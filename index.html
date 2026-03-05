@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elysian PCs — Custom Built Computers</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ─── THEME VARIABLES ─── */
+  :root {
+    --gold: #F0B84A;
+    --gold-light: #F5CC7A;
+    --gold-dark: #C8962A;
+  }
+
+  [data-theme="dark"] {
+    --bg:      #0a0a0f;
+    --bg2:     #12121a;
+    --bg3:     #1a1a28;
+    --bg4:     #222235;
+    --white:   #ffffff;
+    --text:    #ffffff;
+    --text-muted: #888;
+    --border:  rgba(240,184,74,0.25);
+    --shadow-gold: 0 0 40px rgba(240,184,74,0.2);
+    --nav-bg:  rgba(10,10,15,0.92);
+    --nav-scrolled: rgba(10,10,15,0.98);
+    --input-bg: rgba(255,255,255,0.04);
+    --card-spec-text: #bbb;
+    --form-label: #aaa;
+    --modal-bg: #12121a;
+    --footer-bg: #0a0a0f;
+    --hero-grad1: rgba(240,184,74,0.12);
+    --hero-grad2: rgba(168,200,232,0.08);
+  }
+
+  [data-theme="light"] {
+    --bg:      #f5f3ee;
+    --bg2:     #ede9e1;
+    --bg3:     #ffffff;
+    --bg4:     #f0ece4;
+    --white:   #1a1a1a;
+    --text:    #1a1a1a;
+    --text-muted: #666;
+    --border:  rgba(200,150,42,0.3);
+    --shadow-gold: 0 0 40px rgba(240,184,74,0.25);
+    --nav-bg:  rgba(245,243,238,0.94);
+    --nav-scrolled: rgba(245,243,238,0.99);
+    --input-bg: rgba(0,0,0,0.04);
+    --card-spec-text: #444;
+    --form-label: #555;
+    --modal-bg: #ffffff;
+    --footer-bg: #e8e4dc;
+    --hero-grad1: rgba(240,184,74,0.08);
+    --hero-grad2: rgba(168,200,232,0.06);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    transition: background 0.35s, color 0.35s;
+  }
+
+  /* ─── PARTICLES ─── */
+  #particles {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none; z-index: 0; overflow: hidden;
+  }
+  .particle {
+    position: absolute; width: 2px; height: 2px;
+    background: var(--gold); border-radius: 50%; opacity: 0;
+    animation: float-up var(--dur, 8s) var(--delay, 0s) infinite ease-in;
+  }
+  [data-theme="light"] .particle { opacity: 0.4; }
+  @keyframes float-up {
+    0% { transform: translateY(100vh) scale(0); opacity: 0; }
+    10% { opacity: 0.6; } 90% { opacity: 0.2; }
+    100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
+  }
+
+  /* ─── THEME TOGGLE ─── */
+  .theme-toggle {
+    display: flex; align-items: center; gap: 8px;
+    cursor: pointer; user-select: none;
+  }
+  .theme-toggle-track {
+    width: 46px; height: 24px; border-radius: 12px;
+    background: var(--bg3); border: 1.5px solid var(--border);
+    position: relative; transition: background 0.3s;
+    flex-shrink: 0;
+  }
+  [data-theme="light"] .theme-toggle-track { background: linear-gradient(135deg, #ffd700, #ffb347); }
+  .theme-toggle-thumb {
+    position: absolute; top: 2px; left: 2px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    transition: transform 0.3s; font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  [data-theme="light"] .theme-toggle-thumb { transform: translateX(22px); }
+  .theme-icon { font-size: 0.85rem; }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 1000;
+    background: var(--nav-bg);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 70px; transition: all 0.3s;
+  }
+  nav.scrolled { background: var(--nav-scrolled); box-shadow: var(--shadow-gold); }
+  .nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  #nav-logo-img { height: 48px; width: auto; object-fit: contain; }
+  .nav-logo-text {
+    font-family: 'Cinzel', serif; font-size: 1.4rem;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold-dark));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: 2px;
+  }
+  .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+  .nav-links { display: flex; gap: 2rem; list-style: none; align-items: center; }
+  .nav-links a {
+    color: var(--text-muted); text-decoration: none; font-size: 0.9rem;
+    font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    transition: color 0.3s; position: relative;
+  }
+  .nav-links a::after {
+    content: ''; position: absolute; bottom: -4px; left: 0;
+    width: 0; height: 1px; background: var(--gold); transition: width 0.3s;
+  }
+  .nav-links a:hover { color: var(--gold); }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-cart {
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark)) !important;
+    color: #1a1a1a !important; padding: 8px 20px !important;
+    border-radius: 30px; font-weight: 700 !important;
+    -webkit-text-fill-color: #1a1a1a !important;
+  }
+  .nav-cart:hover { opacity: 0.9; }
+  .nav-cart::after { display: none !important; }
+  .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+  .hamburger span { width: 24px; height: 2px; background: var(--gold); transition: 0.3s; }
+
+  /* ─── HERO ─── */
+  #home {
+    min-height: 100vh; display: flex; align-items: center;
+    justify-content: center; position: relative; padding: 70px 2rem 0; text-align: center;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 0%, var(--hero-grad1) 0%, transparent 70%),
+      radial-gradient(ellipse at 20% 80%, var(--hero-grad2) 0%, transparent 50%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+    transition: background 0.35s;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(240,184,74,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(240,184,74,0.05) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+  }
+  .hero-content { position: relative; z-index: 1; max-width: 900px; }
+  #hero-logo-img {
+    width: 280px; margin: 0 auto 2rem; display: block;
+    filter: drop-shadow(0 0 30px rgba(240,184,74,0.5));
+    animation: hero-float 4s ease-in-out infinite;
+  }
+  @keyframes hero-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+  .hero-tagline {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900;
+    background: linear-gradient(135deg, var(--text) 0%, var(--gold-light) 50%, var(--gold-dark) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    line-height: 1.2; margin-bottom: 1.5rem; letter-spacing: 2px;
+  }
+  .hero-sub {
+    font-size: 1.15rem; color: var(--text-muted); max-width: 600px;
+    margin: 0 auto 2.5rem; line-height: 1.8;
+  }
+  .hero-ctas { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: #1a1a1a; padding: 14px 36px; border-radius: 50px; font-weight: 700;
+    font-size: 1rem; text-decoration: none; border: none; cursor: pointer;
+    transition: all 0.3s; box-shadow: 0 4px 20px rgba(240,184,74,0.4);
+    letter-spacing: 1px; display: inline-block;
+  }
+  .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(240,184,74,0.6); }
+  .btn-secondary {
+    background: transparent; color: var(--gold); padding: 13px 36px;
+    border-radius: 50px; font-weight: 700; font-size: 1rem; text-decoration: none;
+    border: 1.5px solid var(--gold); cursor: pointer; transition: all 0.3s;
+    letter-spacing: 1px; display: inline-block;
+  }
+  .btn-secondary:hover { background: rgba(240,184,74,0.1); transform: translateY(-3px); }
+  .hero-scroll {
+    position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: var(--text-muted); font-size: 0.75rem; letter-spacing: 2px;
+    animation: bounce 2s ease-in-out infinite;
+  }
+  .hero-scroll-line { width: 1px; height: 40px; background: linear-gradient(to bottom, var(--gold), transparent); }
+  @keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(-8px)} }
+
+  /* ─── SECTIONS ─── */
+  section { position: relative; z-index: 1; }
+  .section-pad { padding: 100px 2rem; }
+  .section-inner { max-width: 1200px; margin: 0 auto; }
+  .section-header { text-align: center; margin-bottom: 4rem; }
+  .section-label { font-size: 0.75rem; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); font-weight: 700; margin-bottom: 1rem; display: block; }
+  .section-title {
+    font-family: 'Cinzel', serif; font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 700;
+    background: linear-gradient(135deg, var(--text), var(--gold-light));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 1rem;
+  }
+  .section-desc { color: var(--text-muted); font-size: 1.05rem; max-width: 600px; margin: 0 auto; line-height: 1.8; }
+  .divider { width: 60px; height: 2px; background: linear-gradient(90deg, var(--gold), var(--gold-dark)); margin: 1.5rem auto; border-radius: 2px; }
+
+  /* ─── PREBUILT PCs ─── */
+  #prebuilt { background: var(--bg2); transition: background 0.35s; }
+  .pc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; }
+  .pc-card {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden; transition: all 0.4s; position: relative; cursor: pointer;
+  }
+  .pc-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-dark));
+    transform: scaleX(0); transition: transform 0.4s;
+  }
+  .pc-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-gold); border-color: var(--gold-dark); }
+  .pc-card:hover::before { transform: scaleX(1); }
+  .pc-img {
+    width: 100%; height: 220px;
+    background: linear-gradient(135deg, var(--bg), #1a1a2e);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .pc-img img.pc-photo {
+    width: 100%; height: 100%; object-fit: cover;
+    position: absolute; top: 0; left: 0;
+  }
+  .pc-img-emoji {
+    font-size: 5rem; position: relative; z-index: 1;
+    filter: drop-shadow(0 0 20px rgba(240,184,74,0.5));
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+  @keyframes pulse-glow {
+    0%,100%{filter:drop-shadow(0 0 15px rgba(240,184,74,0.4))}
+    50%{filter:drop-shadow(0 0 30px rgba(240,184,74,0.8))}
+  }
+  .pc-tier {
+    position: absolute; top: 12px; right: 12px; z-index: 2;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: #1a1a1a; font-size: 0.7rem; font-weight: 800;
+    padding: 4px 12px; border-radius: 20px; letter-spacing: 2px; text-transform: uppercase;
+  }
+  .pc-body { padding: 1.5rem; }
+  .pc-name { font-family: 'Cinzel', serif; font-size: 1.3rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; }
+  .pc-tagline { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.2rem; }
+  .pc-specs { list-style: none; margin-bottom: 1.5rem; }
+  .pc-specs li {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--card-spec-text); font-size: 0.85rem;
+    padding: 5px 0; border-bottom: 1px solid rgba(128,128,128,0.12);
+  }
+  .pc-specs li:last-child { border-bottom: none; }
+  .spec-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+  .pc-price { font-family: 'Cinzel', serif; font-size: 1.8rem; font-weight: 700; color: var(--gold); margin-bottom: 1rem; }
+  .pc-price span { font-size: 1rem; color: var(--text-muted); font-family: 'Nunito'; }
+  .pc-actions { display: flex; gap: 0.75rem; }
+  .btn-buy {
+    flex: 1; background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: #1a1a1a; padding: 12px; border-radius: 10px;
+    font-weight: 700; font-size: 0.9rem; border: none; cursor: pointer; transition: all 0.3s;
+  }
+  .btn-buy:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(240,184,74,0.4); }
+  .btn-details {
+    padding: 12px 20px; background: transparent; border: 1px solid var(--border);
+    border-radius: 10px; color: var(--gold); font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s;
+  }
+  .btn-details:hover { border-color: var(--gold); background: rgba(240,184,74,0.08); }
+
+  /* ─── BUILD REQUEST ─── */
+  #build { background: var(--bg); transition: background 0.35s; }
+  .build-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; }
+  .build-info h3 { font-family: 'Cinzel', serif; font-size: 1.6rem; color: var(--text); margin-bottom: 1rem; }
+  .build-info p { color: var(--text-muted); line-height: 1.9; margin-bottom: 1.5rem; }
+  .build-steps { list-style: none; }
+  .build-steps li { display: flex; gap: 1rem; align-items: flex-start; padding: 1rem 0; border-bottom: 1px solid var(--border); }
+  .step-num {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: #1a1a1a; font-weight: 800; font-size: 0.9rem;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .step-text strong { color: var(--text); display: block; margin-bottom: 2px; }
+  .step-text span { color: var(--text-muted); font-size: 0.9rem; }
+  .build-form, .shipping-form, .shipping-result, .contact-form-wrap, .checkout-step, .cart-summary {
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 2.5rem;
+    transition: background 0.35s;
+  }
+  .build-form h3, .shipping-form h3, .contact-form-wrap h3 { font-family: 'Cinzel', serif; font-size: 1.3rem; color: var(--gold); margin-bottom: 2rem; }
+  .shipping-result h3 { font-family: 'Cinzel', serif; font-size: 1.2rem; color: var(--text); margin-bottom: 1.5rem; }
+  .checkout-step { border-radius: 16px; margin-bottom: 1.5rem; }
+  .checkout-step h3 { font-family: 'Cinzel', serif; font-size: 1rem; color: var(--gold); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; }
+
+  /* ─── FORMS ─── */
+  .form-group { margin-bottom: 1.2rem; }
+  .form-group label { display: block; color: var(--form-label); font-size: 0.8rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; background: var(--input-bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 16px; color: var(--text);
+    font-family: 'Nunito', sans-serif; font-size: 0.95rem; transition: border-color 0.3s; outline: none;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--gold); }
+  .form-group textarea { resize: vertical; min-height: 100px; }
+  .form-group select { cursor: pointer; }
+  .form-group select option { background: var(--bg2); color: var(--text); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-submit {
+    width: 100%; background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: #1a1a1a; padding: 14px; border-radius: 10px; font-weight: 800; font-size: 1rem;
+    border: none; cursor: pointer; transition: all 0.3s; letter-spacing: 1px; margin-top: 0.5rem;
+  }
+  .form-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(240,184,74,0.5); }
+
+  /* ─── SHIPPING ─── */
+  #shipping { background: var(--bg2); transition: background 0.35s; }
+  .shipping-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+  .rate-card {
+    background: rgba(240,184,74,0.06); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.2rem 1.5rem; margin-bottom: 1rem;
+    display: flex; align-items: center; justify-content: space-between; transition: all 0.3s; cursor: pointer;
+  }
+  .rate-card:hover, .rate-card.selected { border-color: var(--gold); background: rgba(240,184,74,0.1); }
+  .rate-card.selected .rate-radio { background: var(--gold); }
+  .rate-left { display: flex; align-items: center; gap: 12px; }
+  .rate-radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--gold); transition: background 0.2s; }
+  .rate-info strong { color: var(--text); display: block; }
+  .rate-info span { color: var(--text-muted); font-size: 0.85rem; }
+  .rate-price { color: var(--gold); font-weight: 700; font-size: 1.1rem; }
+  .rate-free { color: #4ade80; }
+  .shipping-note { margin-top: 1.5rem; padding: 1rem 1.2rem; background: rgba(240,184,74,0.05); border-left: 3px solid var(--gold); border-radius: 0 8px 8px 0; font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+
+  /* ─── CHECKOUT ─── */
+  #checkout { background: var(--bg); transition: background 0.35s; }
+  .checkout-wrap { display: grid; grid-template-columns: 1fr 380px; gap: 3rem; align-items: start; }
+  .cart-summary { position: sticky; top: 90px; }
+  .cart-summary h3 { font-family: 'Cinzel', serif; font-size: 1.1rem; color: var(--text); margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+  .cart-item { display: flex; align-items: center; gap: 12px; padding: 1rem 0; border-bottom: 1px solid var(--border); }
+  .cart-item-icon { font-size: 2rem; width: 50px; height: 50px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+  .cart-item-icon img { width:50px; height:50px; object-fit:cover; border-radius:8px; }
+  .cart-item-info { flex: 1; }
+  .cart-item-info strong { color: var(--text); display: block; font-size: 0.9rem; }
+  .cart-item-info span { color: var(--text-muted); font-size: 0.8rem; }
+  .cart-item-price { color: var(--gold); font-weight: 700; }
+  .cart-remove { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1rem; transition: color 0.2s; }
+  .cart-remove:hover { color: #ef4444; }
+  .cart-totals { margin-top: 1.5rem; }
+  .cart-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 0.9rem; }
+  .cart-row span:first-child { color: var(--text-muted); }
+  .cart-row span:last-child { color: var(--text); }
+  .cart-total-row { display: flex; justify-content: space-between; padding: 1rem 0 0; margin-top: 0.5rem; border-top: 1px solid var(--border); font-weight: 700; }
+  .cart-total-row span:first-child { color: var(--text); font-size: 1rem; }
+  .cart-total-row span:last-child { color: var(--gold); font-size: 1.3rem; font-family: 'Cinzel'; }
+  .empty-cart { text-align: center; padding: 2rem 0; }
+  .empty-cart-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .step-badge { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); color: #1a1a1a; font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+  .card-icons { display: flex; gap: 8px; margin-top: 1rem; }
+  .card-icon { background: var(--input-bg); border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font-size: 0.75rem; color: var(--text-muted); }
+
+  /* ─── CONTACT ─── */
+  #contact { background: var(--bg2); transition: background 0.35s; }
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+  .social-links { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
+  .social-link {
+    display: flex; align-items: center; gap: 1rem; padding: 1rem 1.5rem;
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 12px;
+    text-decoration: none; color: var(--text); transition: all 0.3s;
+  }
+  .social-link:hover { border-color: var(--gold); background: rgba(240,184,74,0.06); transform: translateX(6px); }
+  .social-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+  .si-instagram { background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+  .si-discord { background: #5865F2; }
+  .si-tiktok { background: #000; border: 1px solid #333; }
+  .si-youtube { background: #FF0000; }
+  .si-twitter { background: #1DA1F2; }
+  .si-facebook { background: #1877F2; }
+  .si-twitch { background: #9146FF; }
+  .si-custom { background: linear-gradient(135deg, var(--gold-dark), var(--gold)); }
+  .social-info strong { display: block; font-size: 0.95rem; }
+  .social-info span { color: var(--text-muted); font-size: 0.85rem; }
+
+  /* ─── FOOTER ─── */
+  footer { background: var(--footer-bg); border-top: 1px solid var(--border); padding: 4rem 2rem 2rem; position: relative; z-index: 1; transition: background 0.35s; }
+  .footer-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; }
+  .footer-brand img { height: 60px; margin-bottom: 1rem; }
+  .footer-brand p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; }
+  .footer-col h4 { font-family: 'Cinzel', serif; font-size: 0.9rem; color: var(--gold); margin-bottom: 1.2rem; letter-spacing: 1px; }
+  .footer-col a { display: block; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; margin-bottom: 0.6rem; transition: color 0.2s; }
+  .footer-col a:hover { color: var(--gold); }
+  .footer-bottom { max-width: 1200px; margin: 3rem auto 0; padding-top: 2rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+  .footer-bottom p { color: var(--text-muted); font-size: 0.85rem; }
+  .admin-trigger { background: rgba(240,184,74,0.08); border: 1px solid var(--border); color: var(--text-muted); padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: all 0.3s; }
+  .admin-trigger:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ─── MODALS ─── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 5000;
+    background: rgba(0,0,0,0.85); display: none; align-items: center;
+    justify-content: center; backdrop-filter: blur(8px); padding: 1rem;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--modal-bg); border: 1px solid var(--border); border-radius: 20px; padding: 2.5rem; width: 100%; max-width: 550px; position: relative; }
+  .modal-close { position: absolute; top: 1.2rem; right: 1.2rem; background: none; border: none; color: var(--text-muted); font-size: 1.3rem; cursor: pointer; }
+  .modal h3 { font-family: 'Cinzel', serif; font-size: 1.3rem; color: var(--gold); margin-bottom: 0.5rem; }
+  .modal-specs { list-style: none; margin: 1.5rem 0; }
+  .modal-specs li { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .modal-specs li span:first-child { color: var(--text-muted); }
+  .modal-specs li span:last-child { color: var(--text); font-weight: 600; }
+
+  /* ─── ADMIN PANEL ─── */
+  #admin {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,0.92); display: none;
+    align-items: center; justify-content: center; backdrop-filter: blur(12px);
+  }
+  #admin.open { display: flex; }
+  .admin-panel {
+    background: var(--bg2); border: 1px solid var(--gold); border-radius: 20px;
+    width: 95%; max-width: 900px; max-height: 90vh; overflow-y: auto;
+    padding: 2.5rem; position: relative;
+  }
+  .admin-close { position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; transition: color 0.2s; }
+  .admin-close:hover { color: var(--text); }
+  .admin-panel > h2 { font-family: 'Cinzel', serif; font-size: 1.5rem; color: var(--gold); margin-bottom: 2rem; display: flex; align-items: center; gap: 10px; }
+  .admin-tabs { display: flex; gap: 0.6rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; flex-wrap: wrap; }
+  .admin-tab { padding: 8px 16px; background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'Nunito', sans-serif; }
+  .admin-tab.active { background: rgba(240,184,74,0.15); border-color: var(--gold); color: var(--gold); }
+  .admin-content { display: none; }
+  .admin-content.active { display: block; }
+
+  /* Admin shared components */
+  .admin-label { display: block; color: var(--form-label); font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; margin-top: 10px; }
+  .admin-input {
+    width: 100%; background: var(--input-bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 14px; color: var(--text);
+    font-family: 'Nunito', sans-serif; font-size: 0.9rem; margin-bottom: 8px; outline: none;
+  }
+  .admin-input:focus { border-color: var(--gold); }
+  .admin-save { background: linear-gradient(135deg, var(--gold), var(--gold-dark)); color: #1a1a1a; padding: 10px 24px; border-radius: 8px; border: none; cursor: pointer; font-weight: 700; font-size: 0.9rem; margin-top: 0.5rem; transition: all 0.2s; }
+  .admin-save:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(240,184,74,0.4); }
+  .admin-add { background: rgba(240,184,74,0.1); border: 1px dashed var(--gold); color: var(--gold); padding: 12px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: 600; font-size: 0.9rem; margin-top: 1rem; transition: background 0.2s; font-family: 'Nunito', sans-serif; }
+  .admin-add:hover { background: rgba(240,184,74,0.18); }
+  .admin-del { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-family: 'Nunito', sans-serif; }
+  .admin-pc-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.2rem; transition: background 0.35s; }
+  .admin-pc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .admin-pc-header strong { color: var(--text); font-size: 1rem; }
+
+  /* Image upload widget */
+  .img-upload-wrap { margin-bottom: 10px; }
+  .img-preview {
+    width: 100%; height: 130px; border-radius: 10px; margin-bottom: 8px;
+    border: 2px dashed var(--border); display: flex; align-items: center; justify-content: center;
+    overflow: hidden; background: var(--bg); cursor: pointer; transition: border-color 0.3s; position: relative;
+  }
+  .img-preview:hover { border-color: var(--gold); }
+  .img-preview img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
+  .img-preview-placeholder { color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 1rem; z-index: 1; }
+  .img-preview-placeholder span { font-size: 2rem; display: block; margin-bottom: 6px; }
+  .img-file-input { display: none; }
+  .img-btn-row { display: flex; gap: 8px; }
+  .img-upload-btn { flex: 1; padding: 8px 14px; background: rgba(240,184,74,0.12); border: 1px solid var(--gold); border-radius: 8px; color: var(--gold); font-size: 0.8rem; font-weight: 600; cursor: pointer; font-family: 'Nunito', sans-serif; transition: background 0.2s; }
+  .img-upload-btn:hover { background: rgba(240,184,74,0.2); }
+  .img-clear-btn { padding: 8px 14px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; color: #ef4444; font-size: 0.8rem; font-weight: 600; cursor: pointer; font-family: 'Nunito', sans-serif; }
+  .img-url-btn { flex: 1; padding: 8px 14px; background: rgba(168,200,232,0.1); border: 1px solid rgba(168,200,232,0.3); border-radius: 8px; color: var(--blue-soft, #a8c8e8); font-size: 0.8rem; font-weight: 600; cursor: pointer; font-family: 'Nunito', sans-serif; }
+
+  /* Admin socials */
+  .social-admin-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem 1.5rem; margin-bottom: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; align-items: start; }
+  .social-admin-item .social-admin-header { grid-column: 1/-1; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.25rem; }
+  .social-admin-item .social-admin-header strong { color: var(--text); display: flex; align-items: center; gap: 8px; }
+
+  /* Admin settings rows */
+  .settings-section { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.2rem; }
+  .settings-section h4 { font-family: 'Cinzel', serif; font-size: 0.9rem; color: var(--gold); margin-bottom: 1.2rem; letter-spacing: 1px; }
+
+  /* ─── TOAST ─── */
+  #toast { position: fixed; bottom: 2rem; right: 2rem; z-index: 9998; display: flex; flex-direction: column; gap: 0.5rem; }
+  .toast-msg { background: var(--bg3); border: 1px solid var(--gold); border-radius: 12px; padding: 1rem 1.5rem; color: var(--text); font-size: 0.9rem; box-shadow: var(--shadow-gold); animation: slide-in 0.3s ease, fade-out 0.3s ease 2.7s forwards; display: flex; align-items: center; gap: 10px; }
+  @keyframes slide-in { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+  @keyframes fade-out { to{opacity:0;transform:translateX(100%)} }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .build-wrap, .shipping-wrap, .checkout-wrap, .contact-grid { grid-template-columns: 1fr; }
+    .footer-inner { grid-template-columns: 1fr 1fr; }
+    .cart-summary { position: static; }
+  }
+  @media (max-width: 650px) {
+    .nav-links { display: none; }
+    .nav-links.open { display: flex; flex-direction: column; position: absolute; top: 70px; left: 0; right: 0; background: var(--bg); padding: 1.5rem; border-bottom: 1px solid var(--border); z-index: 999; }
+    .hamburger { display: flex; }
+    .footer-inner { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .social-admin-item { grid-template-columns: 1fr; }
+    .admin-tabs { gap: 0.4rem; }
+    .admin-tab { padding: 6px 12px; font-size: 0.78rem; }
+  }
+</style>
+</head>
+<body>
+
+<div id="particles"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#home" class="nav-logo" id="nav-logo-link">
+    <img id="nav-logo-img" src="logo.png" alt="Elysian PCs" onerror="this.style.display='none'">
+    <span class="nav-logo-text" id="nav-logo-text" style="display:none">ELYSIAN PCs</span>
+  </a>
+  <div class="nav-right">
+    <ul class="nav-links" id="nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#prebuilt">Prebuilt PCs</a></li>
+      <li><a href="#build">Custom Build</a></li>
+      <li><a href="#shipping">Shipping</a></li>
+      <li><a href="#contact">Contact</a></li>
+      <li><a href="#checkout" class="nav-cart">🛒 Cart (<span id="cart-count">0</span>)</a></li>
+    </ul>
+    <!-- THEME TOGGLE -->
+    <div class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">
+      <span class="theme-icon" id="theme-icon-moon">🌙</span>
+      <div class="theme-toggle-track">
+        <div class="theme-toggle-thumb">☀️</div>
+      </div>
+      <span class="theme-icon" id="theme-icon-sun" style="display:none">☀️</span>
+    </div>
+    <div class="hamburger" onclick="toggleMobile()">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <img id="hero-logo-img" src="logo.png" alt="Elysian PCs" onerror="this.style.display='none'">
+    <h1 class="hero-tagline">Ascend to a Higher<br>Level of Performance</h1>
+    <p class="hero-sub" id="hero-sub">Custom-built PCs crafted with precision and passion. From budget gaming rigs to elite workstations — every build is a masterpiece.</p>
+    <div class="hero-ctas">
+      <a href="#prebuilt" class="btn-primary">Shop Prebuilt PCs</a>
+      <a href="#build" class="btn-secondary">Request Custom Build</a>
+    </div>
+  </div>
+  <div class="hero-scroll"><div class="hero-scroll-line"></div><span>SCROLL</span></div>
+</section>
+
+<!-- PREBUILT -->
+<section id="prebuilt" class="section-pad">
+  <div class="section-inner">
+    <div class="section-header">
+      <span class="section-label">Ready to Ship</span>
+      <h2 class="section-title">Prebuilt Systems</h2>
+      <div class="divider"></div>
+      <p class="section-desc">Every machine is hand-assembled, tested, and ready to dominate.</p>
+    </div>
+    <div class="pc-grid" id="pc-grid"></div>
+  </div>
+</section>
+
+<!-- BUILD REQUEST -->
+<section id="build" class="section-pad">
+  <div class="section-inner">
+    <div class="section-header">
+      <span class="section-label">Made For You</span>
+      <h2 class="section-title">Request a Custom Build</h2>
+      <div class="divider"></div>
+      <p class="section-desc">Tell us your needs, budget, and goals. We'll hand-craft the perfect machine.</p>
+    </div>
+    <div class="build-wrap">
+      <div class="build-info">
+        <h3>How It Works</h3>
+        <p>Share your PC Part Picker list, describe your dream build, or just tell us what you use your PC for. We handle everything from sourcing to assembly to delivery.</p>
+        <ul class="build-steps">
+          <li><div class="step-num">1</div><div class="step-text"><strong>Submit Your Request</strong><span>Fill out the form with your budget, use case, and any parts you have in mind.</span></div></li>
+          <li><div class="step-num">2</div><div class="step-text"><strong>We Create Your Quote</strong><span>We'll reply within 24–48hrs with a detailed build quote and parts list.</span></div></li>
+          <li><div class="step-num">3</div><div class="step-text"><strong>Approve & Pay Deposit</strong><span>Once you approve, we collect a deposit and begin sourcing your components.</span></div></li>
+          <li><div class="step-num">4</div><div class="step-text"><strong>Build & Ship</strong><span>Your PC is assembled, stress-tested, and shipped with full insurance.</span></div></li>
+        </ul>
+      </div>
+      <div class="build-form">
+        <h3>⚡ Submit Build Request</h3>
+        <div class="form-row">
+          <div class="form-group"><label>Your Name</label><input type="text" id="build-name" placeholder="John Doe"></div>
+          <div class="form-group"><label>Email</label><input type="email" id="build-email" placeholder="you@email.com"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Budget Range</label>
+            <select id="build-budget"><option value="">Select budget...</option><option>Under $800</option><option>$800 – $1,200</option><option>$1,200 – $1,800</option><option>$1,800 – $2,500</option><option>$2,500 – $3,500</option><option>$3,500+</option></select>
+          </div>
+          <div class="form-group"><label>Primary Use</label>
+            <select id="build-use"><option value="">Select use...</option><option>Gaming (1080p)</option><option>Gaming (1440p)</option><option>Gaming (4K)</option><option>Video Editing</option><option>3D Rendering</option><option>Streaming + Gaming</option><option>Workstation / Office</option><option>AI / Machine Learning</option></select>
+          </div>
+        </div>
+        <div class="form-group"><label>PC Part Picker Link (optional)</label><input type="url" id="build-pcpp" placeholder="https://pcpartpicker.com/list/..."></div>
+        <div class="form-group"><label>Tell Us More</label><textarea id="build-desc" placeholder="Games you play, software you use, aesthetics you want..."></textarea></div>
+        <div class="form-group"><label>Phone (optional)</label><input type="tel" id="build-phone" placeholder="+1 (555) 000-0000"></div>
+        <button class="form-submit" onclick="submitBuildRequest()">🚀 Send My Request</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SHIPPING -->
+<section id="shipping" class="section-pad">
+  <div class="section-inner">
+    <div class="section-header">
+      <span class="section-label">Nationwide Delivery</span>
+      <h2 class="section-title">Shipping Calculator</h2>
+      <div class="divider"></div>
+      <p class="section-desc">Fully insured shipping on every order. Get an instant estimate below.</p>
+    </div>
+    <div class="shipping-wrap">
+      <div class="shipping-form">
+        <h3>📦 Calculate Shipping</h3>
+        <div class="form-group"><label>Destination ZIP Code</label><input type="text" id="ship-zip" placeholder="e.g. 90210" maxlength="5"></div>
+        <div class="form-group"><label>PC Weight Class</label>
+          <select id="ship-weight"><option value="light">Compact / Mini-ITX (~15 lbs)</option><option value="mid" selected>Mid Tower (~25 lbs)</option><option value="full">Full Tower / Heavy (~40 lbs)</option></select>
+        </div>
+        <div class="form-group"><label>Order Value</label><input type="number" id="ship-value" placeholder="e.g. 1200" min="0"></div>
+        <button class="form-submit" onclick="calcShipping()">Calculate Rates</button>
+      </div>
+      <div class="shipping-result">
+        <h3>Shipping Options</h3>
+        <div id="rate-results"><p style="color:var(--text-muted);font-size:0.9rem;">Enter your ZIP code and click Calculate to see rates.</p></div>
+        <div class="shipping-note">🛡️ All shipments include <strong>full insurance</strong> up to the declared value, signature confirmation, and real-time tracking. Orders over $2,000 ship free with priority service.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CHECKOUT -->
+<section id="checkout" class="section-pad">
+  <div class="section-inner">
+    <div class="section-header">
+      <span class="section-label">Secure Checkout</span>
+      <h2 class="section-title">Complete Your Order</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="checkout-wrap">
+      <div class="checkout-form-section">
+        <div class="checkout-step">
+          <h3><span class="step-badge">1</span> Contact Information</h3>
+          <div class="form-row">
+            <div class="form-group"><label>First Name</label><input type="text" id="co-fname" placeholder="John"></div>
+            <div class="form-group"><label>Last Name</label><input type="text" id="co-lname" placeholder="Doe"></div>
+          </div>
+          <div class="form-group"><label>Email Address</label><input type="email" id="co-email" placeholder="john@email.com"></div>
+          <div class="form-group"><label>Phone</label><input type="tel" id="co-phone" placeholder="+1 (555) 000-0000"></div>
+        </div>
+        <div class="checkout-step">
+          <h3><span class="step-badge">2</span> Shipping Address</h3>
+          <div class="form-group"><label>Street Address</label><input type="text" id="co-addr" placeholder="123 Main Street"></div>
+          <div class="form-row">
+            <div class="form-group"><label>City</label><input type="text" id="co-city" placeholder="Los Angeles"></div>
+            <div class="form-group"><label>State</label>
+              <select id="co-state"><option value="">State...</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option></select>
+            </div>
+            <div class="form-group"><label>ZIP</label><input type="text" id="co-zip" placeholder="90210"></div>
+          </div>
+        </div>
+        <div class="checkout-step">
+          <h3><span class="step-badge">3</span> Payment</h3>
+          <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:1.5rem;">Your payment is processed securely. We accept all major cards and PayPal.</p>
+          <div class="form-group"><label>Card Number</label><input type="text" id="co-card" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCard(this)"></div>
+          <div class="form-row">
+            <div class="form-group"><label>Expiry</label><input type="text" id="co-exp" placeholder="MM / YY" maxlength="7" oninput="formatExp(this)"></div>
+            <div class="form-group"><label>CVV</label><input type="text" id="co-cvv" placeholder="123" maxlength="4"></div>
+          </div>
+          <div class="card-icons"><span class="card-icon">VISA</span><span class="card-icon">MC</span><span class="card-icon">AMEX</span><span class="card-icon">PayPal</span></div>
+        </div>
+        <button class="btn-primary" style="width:100%;padding:16px;font-size:1.05rem;border:none;cursor:pointer" onclick="placeOrder()">🔒 Place Order Securely</button>
+        <p style="text-align:center;color:var(--text-muted);font-size:0.8rem;margin-top:1rem;">By placing your order you agree to our Terms of Service. All builds are non-refundable once assembly begins.</p>
+      </div>
+      <div class="cart-summary">
+        <h3>🛒 Order Summary</h3>
+        <div id="cart-items-display">
+          <div class="empty-cart">
+            <div class="empty-cart-icon">🖥️</div>
+            <p style="color:var(--text-muted);font-size:0.9rem">Your cart is empty.<br>Add a prebuilt PC to get started!</p>
+            <a href="#prebuilt" class="btn-secondary" style="display:inline-block;margin-top:1rem;font-size:0.85rem;padding:10px 24px">Browse PCs</a>
+          </div>
+        </div>
+        <div id="cart-totals" style="display:none"><div class="cart-totals" id="cart-totals-inner"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="section-pad">
+  <div class="section-inner">
+    <div class="section-header">
+      <span class="section-label">Connect With Us</span>
+      <h2 class="section-title">Get In Touch</h2>
+      <div class="divider"></div>
+      <p class="section-desc">Have questions? Follow us for builds, drops, and giveaways.</p>
+    </div>
+    <div class="contact-grid">
+      <div><div class="social-links" id="social-links-display"></div></div>
+      <div class="contact-form-wrap">
+        <h3>✉️ Send a Message</h3>
+        <div class="form-group"><label>Your Name</label><input type="text" id="msg-name" placeholder="John Doe"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="msg-email" placeholder="you@email.com"></div>
+        <div class="form-group"><label>Subject</label>
+          <select id="msg-subject"><option>General Inquiry</option><option>Order Status</option><option>Custom Build Question</option><option>Warranty / Support</option><option>Partnership</option></select>
+        </div>
+        <div class="form-group"><label>Message</label><textarea id="msg-body" placeholder="How can we help you?" style="min-height:140px"></textarea></div>
+        <button class="form-submit" onclick="submitContact()">Send Message</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <img id="footer-logo-img" src="logo.png" alt="Elysian PCs" onerror="this.style.display='none'">
+      <p id="footer-desc">Premium custom PC builds, hand-assembled with care. Every machine is tested and backed by our personal guarantee.</p>
+    </div>
+    <div class="footer-col"><h4>Shop</h4><a href="#prebuilt">Prebuilt PCs</a><a href="#build">Custom Builds</a><a href="#shipping">Shipping Info</a><a href="#checkout">Checkout</a></div>
+    <div class="footer-col"><h4>Info</h4><a href="#contact">Contact Us</a><a href="#">Warranty Policy</a><a href="#">Return Policy</a><a href="#">FAQ</a></div>
+    <div class="footer-col" id="footer-socials"><h4>Follow Us</h4></div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 Elysian PCs. All rights reserved.</p>
+    <div style="display:flex;gap:1rem;align-items:center">
+      <div class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" style="font-size:0.8rem;color:var(--text-muted)">
+        <span id="footer-theme-label">🌙 Dark Mode</span>
+      </div>
+      <button class="admin-trigger" onclick="openAdmin()">⚙️ Admin Panel</button>
+    </div>
+  </div>
+</footer>
+
+<!-- PC DETAIL MODAL -->
+<div class="modal-overlay" id="pc-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('pc-modal')">✕</button>
+    <h3 id="modal-pc-name"></h3>
+    <p id="modal-pc-tagline" style="color:var(--text-muted);margin-bottom:1rem;"></p>
+    <ul class="modal-specs" id="modal-pc-specs"></ul>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:1rem">
+      <div id="modal-pc-price" style="font-family:'Cinzel';font-size:1.8rem;color:var(--gold)"></div>
+      <button class="btn-buy" style="width:auto;padding:12px 28px" onclick="addToCartFromModal()">Add to Cart</button>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER SUCCESS -->
+<div class="modal-overlay" id="order-modal">
+  <div class="modal" style="text-align:center">
+    <div style="font-size:4rem;margin-bottom:1rem">🎉</div>
+    <h3 style="margin-bottom:0.5rem">Order Received!</h3>
+    <p style="color:var(--text-muted);line-height:1.7;margin-bottom:1.5rem">Thanks for your order! We'll send a confirmation to your email shortly. Our team will contact you within 24 hours to confirm payment and begin your build.</p>
+    <button class="btn-primary" onclick="closeModal('order-modal')">Continue Shopping</button>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="admin">
+  <div class="admin-panel">
+    <button class="admin-close" onclick="closeAdmin()">✕</button>
+    <h2>⚙️ Admin Panel</h2>
+
+    <!-- LOGIN -->
+    <div id="admin-login">
+      <p style="color:var(--text-muted);margin-bottom:1.5rem">Enter your admin password to manage site content.</p>
+      <div class="form-group">
+        <label class="admin-label">Admin Password</label>
+        <input type="password" id="admin-pass" class="admin-input" placeholder="Enter password..." onkeydown="if(event.key==='Enter')checkAdminPass()">
+      </div>
+      <button class="admin-save" onclick="checkAdminPass()">Unlock Panel</button>
+      <p style="color:var(--text-muted);font-size:0.8rem;margin-top:0.75rem">Default password: <strong style="color:var(--gold)">elysian2025</strong></p>
+    </div>
+
+    <!-- CONTENT -->
+    <div id="admin-content" style="display:none">
+      <div class="admin-tabs">
+        <button class="admin-tab active" onclick="switchTab('pcs')">🖥️ PCs</button>
+        <button class="admin-tab" onclick="switchTab('images')">🖼️ Images</button>
+        <button class="admin-tab" onclick="switchTab('socials')">📱 Socials</button>
+        <button class="admin-tab" onclick="switchTab('settings')">⚙️ Settings</button>
+      </div>
+
+      <!-- TAB: PCs -->
+      <div class="admin-content active" id="tab-pcs">
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1.5rem">Edit PC listings. Changes save to browser storage.</p>
+        <div id="admin-pc-list"></div>
+        <button class="admin-add" onclick="addNewPC()">+ Add New PC Listing</button>
+      </div>
+
+      <!-- TAB: IMAGES -->
+      <div class="admin-content" id="tab-images">
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1.5rem">Upload images or paste URLs. Uploads are stored as base64 in your browser.</p>
+
+        <!-- Site Logo -->
+        <div class="settings-section">
+          <h4>🏷️ Site Logo</h4>
+          <p style="color:var(--text-muted);font-size:0.82rem;margin-bottom:1rem">Shown in the nav bar and hero section. Replaces the "ELYSIAN PCs" text.</p>
+          <div class="img-upload-wrap">
+            <div class="img-preview" id="preview-logo" onclick="document.getElementById('file-logo').click()">
+              <img id="preview-logo-img" src="" style="display:none">
+              <div class="img-preview-placeholder"><span>🖼️</span>Click to preview</div>
+            </div>
+            <div class="img-btn-row">
+              <button class="img-upload-btn" onclick="document.getElementById('file-logo').click()">📁 Upload File</button>
+              <button class="img-url-btn" onclick="promptImageUrl('logo')">🔗 Use URL</button>
+              <button class="img-clear-btn" onclick="clearImage('logo')">✕ Clear</button>
+            </div>
+            <input type="file" id="file-logo" class="img-file-input" accept="image/*" onchange="handleImageUpload('logo', this)">
+          </div>
+        </div>
+
+        <!-- Hero Logo -->
+        <div class="settings-section">
+          <h4>🦅 Hero Section Logo</h4>
+          <p style="color:var(--text-muted);font-size:0.82rem;margin-bottom:1rem">The large floating logo on the home page. Uses site logo by default if not set.</p>
+          <div class="img-upload-wrap">
+            <div class="img-preview" id="preview-hero" onclick="document.getElementById('file-hero').click()">
+              <img id="preview-hero-img" src="" style="display:none">
+              <div class="img-preview-placeholder"><span>🦅</span>Click to preview</div>
+            </div>
+            <div class="img-btn-row">
+              <button class="img-upload-btn" onclick="document.getElementById('file-hero').click()">📁 Upload File</button>
+              <button class="img-url-btn" onclick="promptImageUrl('hero')">🔗 Use URL</button>
+              <button class="img-clear-btn" onclick="clearImage('hero')">✕ Clear</button>
+            </div>
+            <input type="file" id="file-hero" class="img-file-input" accept="image/*" onchange="handleImageUpload('hero', this)">
+          </div>
+        </div>
+
+        <!-- PC Images -->
+        <div class="settings-section">
+          <h4>🖥️ PC Card Images</h4>
+          <p style="color:var(--text-muted);font-size:0.82rem;margin-bottom:1.2rem">Upload a photo for each PC listing. If none set, the emoji is shown.</p>
+          <div id="pc-image-editors"></div>
+        </div>
+      </div>
+
+      <!-- TAB: SOCIALS -->
+      <div class="admin-content" id="tab-socials">
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1.5rem">Update your social media links, handles, and platform names.</p>
+        <div id="admin-socials-list"></div>
+        <button class="admin-add" onclick="addNewSocial()">+ Add Social Platform</button>
+        <br>
+        <button class="admin-save" onclick="saveSocials()" style="margin-top:1rem">💾 Save All Socials</button>
+      </div>
+
+      <!-- TAB: SETTINGS -->
+      <div class="admin-content" id="tab-settings">
+
+        <div class="settings-section">
+          <h4>📝 Site Text</h4>
+          <label class="admin-label">Hero Subtitle</label>
+          <textarea class="admin-input" id="s-hero-sub" style="min-height:80px"></textarea>
+          <label class="admin-label">Footer Description</label>
+          <textarea class="admin-input" id="s-footer-desc" style="min-height:80px"></textarea>
+          <button class="admin-save" onclick="saveSettings()">💾 Save Text</button>
+        </div>
+
+        <div class="settings-section">
+          <h4>🔒 Change Admin Password</h4>
+          <label class="admin-label">New Password</label>
+          <input type="password" class="admin-input" id="s-new-pass" placeholder="Enter new password...">
+          <label class="admin-label">Confirm Password</label>
+          <input type="password" class="admin-input" id="s-confirm-pass" placeholder="Confirm new password...">
+          <button class="admin-save" onclick="changePassword()">🔒 Update Password</button>
+        </div>
+
+        <div class="settings-section">
+          <h4>🎨 Theme Default</h4>
+          <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1rem">Set which theme visitors see by default.</p>
+          <div style="display:flex;gap:1rem">
+            <button class="admin-tab" id="def-dark-btn" onclick="setDefaultTheme('dark')" style="flex:1">🌙 Dark (default)</button>
+            <button class="admin-tab" id="def-light-btn" onclick="setDefaultTheme('light')" style="flex:1">☀️ Light</button>
+          </div>
+        </div>
+
+        <div class="settings-section" style="border-color:rgba(239,68,68,0.3)">
+          <h4 style="color:#ef4444">⚠️ Reset Site Data</h4>
+          <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1rem">Clear all saved data and reset to defaults. This cannot be undone.</p>
+          <button onclick="resetData()" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#ef4444;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:700;font-family:'Nunito',sans-serif">🗑️ Reset All Data</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// DEFAULT DATA
+// ═══════════════════════════════════════════════════
+const DEFAULT_DATA = {
+  pcs: [
+    { id: 1, name: "The Ascendant", tier: "BUDGET", tagline: "Dominate 1080p. No compromises.", emoji: "🖥️", image: "", price: 799,
+      specs: ["AMD Ryzen 5 7600X CPU","RX 7600 8GB GPU","16GB DDR5 5200MHz RAM","512GB NVMe SSD","650W 80+ Bronze PSU","Mid Tower RGB Case"],
+      fullSpecs: { "CPU": "AMD Ryzen 5 7600X", "GPU": "AMD RX 7600 8GB", "RAM": "16GB DDR5 5200MHz", "Storage": "512GB NVMe SSD", "Motherboard": "B650 Micro-ATX", "PSU": "650W 80+ Bronze", "Case": "Mid Tower with RGB", "OS": "Windows 11 Home" }
+    },
+    { id: 2, name: "The Elysian", tier: "POPULAR", tagline: "1440p beast. Built to stream.", emoji: "💻", image: "", price: 1399,
+      specs: ["Intel Core i7-14700K CPU","RTX 4070 12GB GPU","32GB DDR5 6000MHz RAM","1TB NVMe Gen4 SSD","850W 80+ Gold PSU","Full Tower with AIO Cooling"],
+      fullSpecs: { "CPU": "Intel Core i7-14700K", "GPU": "NVIDIA RTX 4070 12GB", "RAM": "32GB DDR5 6000MHz", "Storage": "1TB NVMe Gen4 SSD", "Motherboard": "Z790 ATX", "PSU": "850W 80+ Gold Modular", "Cooling": "360mm AIO Liquid Cooler", "Case": "Full Tower Tempered Glass", "OS": "Windows 11 Home" }
+    },
+    { id: 3, name: "The Celestial", tier: "ELITE", tagline: "4K. 240fps. Pure divinity.", emoji: "🚀", image: "", price: 2499,
+      specs: ["Intel Core i9-14900K CPU","RTX 4090 24GB GPU","64GB DDR5 7200MHz RAM","2TB + 1TB NVMe SSDs","1200W 80+ Platinum PSU","Premium ARGB Build w/ Custom Cable"],
+      fullSpecs: { "CPU": "Intel Core i9-14900K", "GPU": "NVIDIA RTX 4090 24GB", "RAM": "64GB DDR5 7200MHz", "Storage": "2TB + 1TB NVMe Gen4 SSD", "Motherboard": "Z790 EATX", "PSU": "1200W 80+ Platinum Modular", "Cooling": "420mm AIO + 6x Case Fans", "Case": "Premium ARGB Full Tower", "Custom Cables": "Sleeved Gold/White", "OS": "Windows 11 Pro" }
+    }
+  ],
+  socials: [
+    { id: 1, platform: "Instagram", handle: "@elysianpcs", url: "https://instagram.com", icon: "📸", colorClass: "si-instagram" },
+    { id: 2, platform: "Discord", handle: "discord.gg/elysianpcs", url: "https://discord.gg", icon: "💬", colorClass: "si-discord" },
+    { id: 3, platform: "TikTok", handle: "@elysianpcs", url: "https://tiktok.com", icon: "🎵", colorClass: "si-tiktok" },
+    { id: 4, platform: "YouTube", handle: "Elysian PCs", url: "https://youtube.com", icon: "▶️", colorClass: "si-youtube" }
+  ],
+  images: { logo: "", hero: "" },
+  settings: {
+    heroSub: "Custom-built PCs crafted with precision and passion. From budget gaming rigs to elite workstations — every build is a masterpiece.",
+    footerDesc: "Premium custom PC builds, hand-assembled with care. Every machine is tested and backed by our personal guarantee.",
+    adminPass: "elysian2025",
+    defaultTheme: "dark"
+  }
+};
+
+let siteData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+let cart = [];
+let currentModalPC = null;
+
+// ═══════════════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════════════
+function loadData() {
+  try {
+    const saved = localStorage.getItem('elysian_v2');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      siteData = { ...DEFAULT_DATA, ...parsed };
+      siteData.settings = { ...DEFAULT_DATA.settings, ...parsed.settings };
+      siteData.images = { ...DEFAULT_DATA.images, ...(parsed.images || {}) };
+    }
+  } catch(e) {}
+}
+function saveData() {
+  try { localStorage.setItem('elysian_v2', JSON.stringify(siteData)); } catch(e) { toast('⚠️ Storage full — try clearing some images.'); }
+}
+function resetData() {
+  if (confirm('Are you sure? This will reset ALL site data including images. This cannot be undone.')) {
+    localStorage.removeItem('elysian_v2');
+    location.reload();
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════════════════
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const moonIcon = document.getElementById('theme-icon-moon');
+  const label = document.getElementById('footer-theme-label');
+  if (theme === 'light') {
+    if (moonIcon) moonIcon.textContent = '☀️';
+    if (label) label.textContent = '☀️ Light Mode';
+    document.getElementById('def-light-btn') && document.getElementById('def-light-btn').classList.add('active');
+    document.getElementById('def-dark-btn') && document.getElementById('def-dark-btn').classList.remove('active');
+  } else {
+    if (moonIcon) moonIcon.textContent = '🌙';
+    if (label) label.textContent = '🌙 Dark Mode';
+    document.getElementById('def-dark-btn') && document.getElementById('def-dark-btn').classList.add('active');
+    document.getElementById('def-light-btn') && document.getElementById('def-light-btn').classList.remove('active');
+  }
+}
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  try { localStorage.setItem('elysian_theme', next); } catch(e){}
+}
+function setDefaultTheme(t) {
+  siteData.settings.defaultTheme = t;
+  saveData();
+  applyTheme(t);
+  toast(`✅ Default theme set to ${t} mode.`);
+}
+function loadTheme() {
+  try {
+    const saved = localStorage.getItem('elysian_theme');
+    applyTheme(saved || siteData.settings.defaultTheme || 'dark');
+  } catch(e) { applyTheme('dark'); }
+}
+
+// ═══════════════════════════════════════════════════
+// IMAGE HELPERS
+// ═══════════════════════════════════════════════════
+function handleImageUpload(key, input, pcId) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 3 * 1024 * 1024) { toast('⚠️ Image too large. Please use an image under 3MB.'); return; }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const dataUrl = e.target.result;
+    storeImage(key, dataUrl, pcId);
+  };
+  reader.readAsDataURL(file);
+}
+function storeImage(key, dataUrl, pcId) {
+  if (key === 'logo') {
+    siteData.images.logo = dataUrl;
+    applyLogoImage(dataUrl);
+    updateAdminPreview('logo', dataUrl);
+  } else if (key === 'hero') {
+    siteData.images.hero = dataUrl;
+    applyHeroImage(dataUrl);
+    updateAdminPreview('hero', dataUrl);
+  } else if (key === 'pc' && pcId != null) {
+    const pc = siteData.pcs.find(p => p.id == pcId);
+    if (pc) {
+      pc.image = dataUrl;
+      updateAdminPreview('pc-' + pcId, dataUrl);
+      renderPCs();
+    }
+  }
+  saveData();
+  toast('✅ Image updated!');
+}
+function promptImageUrl(key, pcId) {
+  const url = prompt('Paste an image URL:');
+  if (url && url.trim()) storeImage(key, url.trim(), pcId);
+}
+function clearImage(key, pcId) {
+  if (key === 'logo') {
+    siteData.images.logo = '';
+    applyLogoImage('');
+    updateAdminPreview('logo', '');
+  } else if (key === 'hero') {
+    siteData.images.hero = '';
+    applyHeroImage('');
+    updateAdminPreview('hero', '');
+  } else if (key === 'pc' && pcId != null) {
+    const pc = siteData.pcs.find(p => p.id == pcId);
+    if (pc) { pc.image = ''; updateAdminPreview('pc-' + pcId, ''); renderPCs(); }
+  }
+  saveData();
+  toast('Image cleared.');
+}
+function updateAdminPreview(key, src) {
+  const img = document.getElementById('preview-' + key + '-img');
+  const placeholder = document.querySelector('#preview-' + key + ' .img-preview-placeholder');
+  if (!img) return;
+  if (src) {
+    img.src = src; img.style.display = 'block';
+    if (placeholder) placeholder.style.display = 'none';
+  } else {
+    img.style.display = 'none'; img.src = '';
+    if (placeholder) placeholder.style.display = 'flex';
+  }
+}
+function applyLogoImage(src) {
+  const navImg = document.getElementById('nav-logo-img');
+  const navText = document.getElementById('nav-logo-text');
+  const footerImg = document.getElementById('footer-logo-img');
+  if (src) {
+    navImg.src = src; navImg.style.display = 'block';
+    navText.style.display = 'none';
+    if (footerImg) { footerImg.src = src; footerImg.style.display = 'block'; }
+  } else {
+    navImg.src = 'logo.png'; navImg.style.display = 'block';
+    navText.style.display = 'none';
+    if (footerImg) { footerImg.src = 'logo.png'; }
+  }
+}
+function applyHeroImage(src) {
+  const heroImg = document.getElementById('hero-logo-img');
+  if (src) { heroImg.src = src; heroImg.style.display = 'block'; }
+  else {
+    const fallback = siteData.images.logo || 'logo.png';
+    heroImg.src = fallback; heroImg.style.display = 'block';
+  }
+}
+function applyAllImages() {
+  if (siteData.images.logo) applyLogoImage(siteData.images.logo);
+  if (siteData.images.hero) applyHeroImage(siteData.images.hero);
+  else if (siteData.images.logo) applyHeroImage(siteData.images.logo);
+}
+
+// ═══════════════════════════════════════════════════
+// RENDER PCs
+// ═══════════════════════════════════════════════════
+function renderPCs() {
+  const grid = document.getElementById('pc-grid');
+  grid.innerHTML = siteData.pcs.map(pc => {
+    const imgContent = pc.image
+      ? `<img class="pc-photo" src="${pc.image}" alt="${pc.name}"><span class="pc-img-emoji" style="opacity:0">${pc.emoji}</span>`
+      : `<span class="pc-img-emoji">${pc.emoji}</span>`;
+    return `
+    <div class="pc-card" onclick="openPCModal(${pc.id})">
+      <div class="pc-img">
+        ${imgContent}
+        <span class="pc-tier">${pc.tier}</span>
+      </div>
+      <div class="pc-body">
+        <div class="pc-name">${pc.name}</div>
+        <div class="pc-tagline">${pc.tagline}</div>
+        <ul class="pc-specs">
+          ${pc.specs.slice(0,5).map(s => `<li><span class="spec-dot"></span>${s}</li>`).join('')}
+        </ul>
+        <div class="pc-price">$${pc.price.toLocaleString()} <span>USD</span></div>
+        <div class="pc-actions">
+          <button class="btn-buy" onclick="event.stopPropagation();addToCart(${pc.id})">Add to Cart</button>
+          <button class="btn-details" onclick="event.stopPropagation();openPCModal(${pc.id})">Details</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// PC MODAL
+// ═══════════════════════════════════════════════════
+function openPCModal(id) {
+  const pc = siteData.pcs.find(p => p.id === id);
+  currentModalPC = pc;
+  document.getElementById('modal-pc-name').textContent = pc.name;
+  document.getElementById('modal-pc-tagline').textContent = pc.tagline;
+  document.getElementById('modal-pc-price').textContent = `$${pc.price.toLocaleString()}`;
+  document.getElementById('modal-pc-specs').innerHTML = Object.entries(pc.fullSpecs || {}).map(([k,v]) =>
+    `<li><span>${k}</span><span>${v}</span></li>`).join('');
+  document.getElementById('pc-modal').classList.add('open');
+}
+function addToCartFromModal() {
+  if (currentModalPC) { addToCart(currentModalPC.id); closeModal('pc-modal'); }
+}
+
+// ═══════════════════════════════════════════════════
+// CART
+// ═══════════════════════════════════════════════════
+function addToCart(id) {
+  const pc = siteData.pcs.find(p => p.id === id);
+  const existing = cart.find(c => c.id === id);
+  if (existing) existing.qty++;
+  else cart.push({ ...pc, qty: 1 });
+  updateCartDisplay(); toast(`🛒 ${pc.name} added to cart!`);
+}
+function removeFromCart(id) {
+  cart = cart.filter(c => c.id !== id); updateCartDisplay();
+}
+function updateCartDisplay() {
+  const count = cart.reduce((s,c) => s + c.qty, 0);
+  document.getElementById('cart-count').textContent = count;
+  const display = document.getElementById('cart-items-display');
+  const totalsDiv = document.getElementById('cart-totals');
+  const totalsInner = document.getElementById('cart-totals-inner');
+  if (cart.length === 0) {
+    display.innerHTML = `<div class="empty-cart"><div class="empty-cart-icon">🖥️</div><p style="color:var(--text-muted);font-size:0.9rem">Your cart is empty.<br>Add a prebuilt PC to get started!</p><a href="#prebuilt" class="btn-secondary" style="display:inline-block;margin-top:1rem;font-size:0.85rem;padding:10px 24px">Browse PCs</a></div>`;
+    totalsDiv.style.display = 'none';
+  } else {
+    display.innerHTML = cart.map(c => {
+      const iconHtml = c.image ? `<img src="${c.image}" alt="${c.name}">` : c.emoji;
+      return `<div class="cart-item">
+        <div class="cart-item-icon">${iconHtml}</div>
+        <div class="cart-item-info"><strong>${c.name}</strong><span>Qty: ${c.qty}</span></div>
+        <div class="cart-item-price">$${(c.price * c.qty).toLocaleString()}</div>
+        <button class="cart-remove" onclick="removeFromCart(${c.id})">✕</button>
+      </div>`;
+    }).join('');
+    const sub = cart.reduce((s,c) => s + c.price * c.qty, 0);
+    const ship = sub > 2000 ? 0 : 89;
+    const tax = Math.round(sub * 0.08);
+    const total = sub + ship + tax;
+    totalsInner.innerHTML = `
+      <div class="cart-row"><span>Subtotal</span><span>$${sub.toLocaleString()}</span></div>
+      <div class="cart-row"><span>Shipping</span><span>${ship === 0 ? '<span style="color:#4ade80">FREE</span>' : '$'+ship}</span></div>
+      <div class="cart-row"><span>Est. Tax (8%)</span><span>$${tax.toLocaleString()}</span></div>
+      <div class="cart-total-row"><span>Total</span><span>$${total.toLocaleString()}</span></div>`;
+    totalsDiv.style.display = 'block';
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// SHIPPING
+// ═══════════════════════════════════════════════════
+function calcShipping() {
+  const zip = document.getElementById('ship-zip').value;
+  const weight = document.getElementById('ship-weight').value;
+  const val = parseFloat(document.getElementById('ship-value').value) || 0;
+  if (!zip || zip.length < 5) { toast('Please enter a valid 5-digit ZIP code.'); return; }
+  const weights = { light:{ground:12,express:28,overnight:55}, mid:{ground:19,express:39,overnight:79}, full:{ground:29,express:59,overnight:119} };
+  const rates = weights[weight]; const isFree = val >= 2000;
+  document.getElementById('rate-results').innerHTML = [
+    { name:'Standard Ground', days:'5-7 business days', key:'ground' },
+    { name:'Express 2-Day', days:'2 business days', key:'express' },
+    { name:'Overnight Priority', days:'Next business day', key:'overnight' }
+  ].map((r,i) => `
+    <div class="rate-card ${i===0?'selected':''}" onclick="selectRate(this)">
+      <div class="rate-left">
+        <div class="rate-radio ${i===0?'':''}"></div>
+        <div class="rate-info"><strong>${r.name}</strong><span>${r.days}</span></div>
+      </div>
+      <div class="rate-price ${isFree&&i===0?'rate-free':''}">${isFree&&i===0?'FREE':'$'+rates[r.key]}</div>
+    </div>`).join('');
+  if (isFree) document.querySelector('.rate-card .rate-radio').style.background = 'var(--gold)';
+}
+function selectRate(el) {
+  document.querySelectorAll('.rate-card').forEach(c => { c.classList.remove('selected'); c.querySelector('.rate-radio').style.background = ''; });
+  el.classList.add('selected'); el.querySelector('.rate-radio').style.background = 'var(--gold)';
+}
+
+// ═══════════════════════════════════════════════════
+// FORMS
+// ═══════════════════════════════════════════════════
+function submitBuildRequest() {
+  const name = document.getElementById('build-name').value;
+  const email = document.getElementById('build-email').value;
+  const budget = document.getElementById('build-budget').value;
+  if (!name || !email || !budget) { toast('⚠️ Please fill in your name, email, and budget.'); return; }
+  toast('✅ Build request submitted! We\'ll reach out within 24-48 hours.');
+  ['build-name','build-email','build-budget','build-use','build-pcpp','build-desc','build-phone'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+}
+function submitContact() {
+  const name = document.getElementById('msg-name').value;
+  const email = document.getElementById('msg-email').value;
+  const body = document.getElementById('msg-body').value;
+  if (!name || !email || !body) { toast('⚠️ Please fill in all fields.'); return; }
+  toast('✅ Message sent! We\'ll get back to you soon.');
+  ['msg-name','msg-email','msg-body'].forEach(id => document.getElementById(id).value = '');
+}
+function placeOrder() {
+  if (cart.length === 0) { toast('⚠️ Your cart is empty!'); return; }
+  const fname = document.getElementById('co-fname').value;
+  const email = document.getElementById('co-email').value;
+  const addr = document.getElementById('co-addr').value;
+  const card = document.getElementById('co-card').value;
+  if (!fname || !email || !addr || !card) { toast('⚠️ Please fill in all required fields.'); return; }
+  cart = []; updateCartDisplay(); document.getElementById('order-modal').classList.add('open');
+}
+function formatCard(el) { let v = el.value.replace(/\D/g,'').substring(0,16); el.value = v.replace(/(.{4})/g,'$1 ').trim(); }
+function formatExp(el) { let v = el.value.replace(/\D/g,'').substring(0,4); if(v.length>2) v=v.substring(0,2)+' / '+v.substring(2); el.value=v; }
+
+// ═══════════════════════════════════════════════════
+// SOCIALS
+// ═══════════════════════════════════════════════════
+function renderSocials() {
+  const display = document.getElementById('social-links-display');
+  display.innerHTML = siteData.socials.map(s => `
+    <a href="${s.url}" target="_blank" class="social-link">
+      <div class="social-icon ${s.colorClass}">${s.icon}</div>
+      <div class="social-info"><strong>${s.platform}</strong><span>${s.handle}</span></div>
+    </a>`).join('');
+  document.getElementById('footer-socials').innerHTML = '<h4>Follow Us</h4>' +
+    siteData.socials.map(s => `<a href="${s.url}" target="_blank">${s.icon} ${s.platform}</a>`).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// ADMIN
+// ═══════════════════════════════════════════════════
+function openAdmin() { document.getElementById('admin').classList.add('open'); }
+function closeAdmin() { document.getElementById('admin').classList.remove('open'); }
+function checkAdminPass() {
+  const pass = document.getElementById('admin-pass').value;
+  if (pass === siteData.settings.adminPass) {
+    document.getElementById('admin-login').style.display = 'none';
+    document.getElementById('admin-content').style.display = 'block';
+    renderAdminPCs(); renderAdminSocials(); renderImageEditors();
+    document.getElementById('s-hero-sub').value = siteData.settings.heroSub;
+    document.getElementById('s-footer-desc').value = siteData.settings.footerDesc;
+    // Restore previews
+    if (siteData.images.logo) updateAdminPreview('logo', siteData.images.logo);
+    if (siteData.images.hero) updateAdminPreview('hero', siteData.images.hero);
+    applyThemeButtonStates();
+  } else { toast('⚠️ Incorrect password.'); }
+}
+function applyThemeButtonStates() {
+  const theme = document.documentElement.getAttribute('data-theme');
+  const db = document.getElementById('def-dark-btn');
+  const lb = document.getElementById('def-light-btn');
+  if (db && lb) {
+    db.classList.toggle('active', theme === 'dark');
+    lb.classList.toggle('active', theme === 'light');
+  }
+}
+function switchTab(tab) {
+  const tabs = ['pcs','images','socials','settings'];
+  document.querySelectorAll('.admin-tab').forEach((t,i) => t.classList.toggle('active', tabs[i] === tab));
+  document.querySelectorAll('.admin-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+// Admin PCs
+function renderAdminPCs() {
+  document.getElementById('admin-pc-list').innerHTML = siteData.pcs.map((pc, idx) => `
+    <div class="admin-pc-item">
+      <div class="admin-pc-header">
+        <strong>${pc.emoji} ${pc.name}</strong>
+        <button class="admin-del" onclick="deletePC(${pc.id})">🗑 Delete</button>
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <div>
+          <label class="admin-label">Name</label>
+          <input class="admin-input" value="${pc.name}" oninput="siteData.pcs[${idx}].name=this.value">
+        </div>
+        <div>
+          <label class="admin-label">Tier Badge</label>
+          <input class="admin-input" value="${pc.tier}" oninput="siteData.pcs[${idx}].tier=this.value" placeholder="POPULAR">
+        </div>
+      </div>
+      <label class="admin-label">Tagline</label>
+      <input class="admin-input" value="${pc.tagline}" oninput="siteData.pcs[${idx}].tagline=this.value">
+      <div class="form-row" style="margin-bottom:0">
+        <div>
+          <label class="admin-label">Price (USD)</label>
+          <input class="admin-input" type="number" value="${pc.price}" oninput="siteData.pcs[${idx}].price=Number(this.value)">
+        </div>
+        <div>
+          <label class="admin-label">Emoji (fallback)</label>
+          <input class="admin-input" value="${pc.emoji}" oninput="siteData.pcs[${idx}].emoji=this.value">
+        </div>
+      </div>
+      <label class="admin-label">Specs (one per line)</label>
+      <textarea class="admin-input" style="min-height:100px" oninput="siteData.pcs[${idx}].specs=this.value.split('\\n').filter(s=>s)">${pc.specs.join('\n')}</textarea>
+      <button class="admin-save" onclick="savePCs()">💾 Save Changes</button>
+    </div>`).join('');
+}
+function savePCs() { saveData(); renderPCs(); renderImageEditors(); toast('✅ PCs saved!'); }
+function deletePC(id) {
+  if (confirm('Delete this PC listing?')) {
+    siteData.pcs = siteData.pcs.filter(p => p.id !== id);
+    renderAdminPCs(); renderPCs(); renderImageEditors(); saveData(); toast('PC deleted.');
+  }
+}
+function addNewPC() {
+  const newId = Date.now();
+  siteData.pcs.push({ id: newId, name: "New PC", tier: "NEW", tagline: "Your tagline here", emoji: "🖥️", image: "", price: 999, specs: ["CPU","GPU","RAM"], fullSpecs: {} });
+  renderAdminPCs(); renderPCs(); renderImageEditors(); saveData();
+  toast('New PC added. Edit it above then save.');
+}
+
+// Admin Image Editors (PC images)
+function renderImageEditors() {
+  const container = document.getElementById('pc-image-editors');
+  container.innerHTML = siteData.pcs.map(pc => `
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:1.2rem;margin-bottom:1rem">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.8rem">
+        <span style="font-size:1.5rem">${pc.emoji}</span>
+        <strong style="color:var(--text)">${pc.name}</strong>
+        ${pc.image ? '<span style="color:#4ade80;font-size:0.75rem;background:rgba(74,222,128,0.1);padding:2px 8px;border-radius:10px;border:1px solid rgba(74,222,128,0.3)">✓ Image Set</span>' : '<span style="color:var(--text-muted);font-size:0.75rem">Using emoji</span>'}
+      </div>
+      <div class="img-upload-wrap">
+        <div class="img-preview" id="preview-pc-${pc.id}" onclick="document.getElementById('file-pc-${pc.id}').click()">
+          <img id="preview-pc-${pc.id}-img" src="${pc.image || ''}" style="display:${pc.image ? 'block' : 'none'}">
+          <div class="img-preview-placeholder" style="display:${pc.image ? 'none' : 'flex'};flex-direction:column;align-items:center"><span>${pc.emoji}</span>Click to upload</div>
+        </div>
+        <div class="img-btn-row">
+          <button class="img-upload-btn" onclick="document.getElementById('file-pc-${pc.id}').click()">📁 Upload Photo</button>
+          <button class="img-url-btn" onclick="promptImageUrl('pc', ${pc.id})">🔗 Use URL</button>
+          <button class="img-clear-btn" onclick="clearImage('pc', ${pc.id})">✕ Clear</button>
+        </div>
+        <input type="file" id="file-pc-${pc.id}" class="img-file-input" accept="image/*" onchange="handleImageUpload('pc', this, ${pc.id})">
+      </div>
+    </div>`).join('');
+}
+
+// Admin Socials
+const SOCIAL_PLATFORMS = [
+  { label: 'Instagram', icon: '📸', colorClass: 'si-instagram' },
+  { label: 'Discord', icon: '💬', colorClass: 'si-discord' },
+  { label: 'TikTok', icon: '🎵', colorClass: 'si-tiktok' },
+  { label: 'YouTube', icon: '▶️', colorClass: 'si-youtube' },
+  { label: 'Twitter / X', icon: '🐦', colorClass: 'si-twitter' },
+  { label: 'Facebook', icon: '👤', colorClass: 'si-facebook' },
+  { label: 'Twitch', icon: '🎮', colorClass: 'si-twitch' },
+  { label: 'Custom', icon: '🔗', colorClass: 'si-custom' }
+];
+function renderAdminSocials() {
+  document.getElementById('admin-socials-list').innerHTML = siteData.socials.map((s, i) => `
+    <div class="social-admin-item">
+      <div class="social-admin-header">
+        <strong><span style="font-size:1.3rem">${s.icon}</span> ${s.platform}</strong>
+        <button class="admin-del" onclick="deleteSocial(${s.id})">🗑 Remove</button>
+      </div>
+      <div>
+        <label class="admin-label">Platform Name</label>
+        <input class="admin-input" value="${s.platform}" oninput="siteData.socials[${i}].platform=this.value">
+      </div>
+      <div>
+        <label class="admin-label">Handle / Username</label>
+        <input class="admin-input" value="${s.handle}" oninput="siteData.socials[${i}].handle=this.value">
+      </div>
+      <div>
+        <label class="admin-label">Full URL</label>
+        <input class="admin-input" value="${s.url}" oninput="siteData.socials[${i}].url=this.value" placeholder="https://...">
+      </div>
+      <div>
+        <label class="admin-label">Icon Emoji</label>
+        <input class="admin-input" value="${s.icon}" oninput="siteData.socials[${i}].icon=this.value" style="width:80px">
+      </div>
+      <div>
+        <label class="admin-label">Color Style</label>
+        <select class="admin-input" onchange="siteData.socials[${i}].colorClass=this.value">
+          ${SOCIAL_PLATFORMS.map(p => `<option value="${p.colorClass}" ${s.colorClass===p.colorClass?'selected':''}>${p.label}</option>`).join('')}
+        </select>
+      </div>
+    </div>`).join('');
+}
+function saveSocials() { saveData(); renderSocials(); renderAdminSocials(); toast('✅ Socials saved!'); }
+function deleteSocial(id) {
+  siteData.socials = siteData.socials.filter(s => s.id !== id);
+  renderAdminSocials(); renderSocials(); saveData(); toast('Social removed.');
+}
+function addNewSocial() {
+  const newId = Date.now();
+  siteData.socials.push({ id: newId, platform: "New Platform", handle: "@handle", url: "https://", icon: "🔗", colorClass: "si-custom" });
+  renderAdminSocials(); saveData();
+}
+
+// Settings
+function saveSettings() {
+  siteData.settings.heroSub = document.getElementById('s-hero-sub').value;
+  siteData.settings.footerDesc = document.getElementById('s-footer-desc').value;
+  document.getElementById('hero-sub').textContent = siteData.settings.heroSub;
+  document.getElementById('footer-desc').textContent = siteData.settings.footerDesc;
+  saveData(); toast('✅ Text settings saved!');
+}
+function changePassword() {
+  const np = document.getElementById('s-new-pass').value;
+  const cp = document.getElementById('s-confirm-pass').value;
+  if (!np) { toast('⚠️ Please enter a new password.'); return; }
+  if (np !== cp) { toast('⚠️ Passwords do not match.'); return; }
+  if (np.length < 6) { toast('⚠️ Password must be at least 6 characters.'); return; }
+  siteData.settings.adminPass = np;
+  saveData();
+  document.getElementById('s-new-pass').value = '';
+  document.getElementById('s-confirm-pass').value = '';
+  toast('✅ Password updated!');
+}
+
+// ═══════════════════════════════════════════════════
+// MODALS & NAV
+// ═══════════════════════════════════════════════════
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', function(e) { if(e.target===this) this.classList.remove('open'); }));
+window.addEventListener('scroll', () => document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50));
+function toggleMobile() { document.getElementById('nav-links').classList.toggle('open'); }
+
+// ═══════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════
+function toast(msg) {
+  const t = document.getElementById('toast');
+  const el = document.createElement('div');
+  el.className = 'toast-msg'; el.textContent = msg;
+  t.appendChild(el); setTimeout(() => el.remove(), 3100);
+}
+
+// ═══════════════════════════════════════════════════
+// PARTICLES
+// ═══════════════════════════════════════════════════
+function createParticles() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 25; i++) {
+    const p = document.createElement('div'); p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.setProperty('--dur', (6 + Math.random() * 8) + 's');
+    p.style.setProperty('--delay', (Math.random() * 8) + 's');
+    container.appendChild(p);
+  }
+}
+
+// Nav logo: hide text when image loads
+document.getElementById('nav-logo-img').addEventListener('load', function() {
+  this.style.display = 'block';
+  document.getElementById('nav-logo-text').style.display = 'none';
+});
+document.getElementById('nav-logo-img').addEventListener('error', function() {
+  this.style.display = 'none';
+  document.getElementById('nav-logo-text').style.display = 'block';
+});
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+loadData();
+loadTheme();
+createParticles();
+renderPCs();
+renderSocials();
+updateCartDisplay();
+applyAllImages();
+document.getElementById('hero-sub').textContent = siteData.settings.heroSub;
+document.getElementById('footer-desc').textContent = siteData.settings.footerDesc;
+</script>
+</body>
+</html>
