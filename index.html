@@ -1,53 +1,104 @@
-<script src="https://js.stripe.com/v3/"></script>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elysian PCs — Custom Built Computers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Nunito:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    
+    <style>
+        :root { --gold: #F0B84A; --bg: #0a0a0f; --white: #ffffff; }
+        body { background: var(--bg); color: var(--white); font-family: 'Nunito', sans-serif; margin: 0; }
+        .nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 5%; border-bottom: 1px solid rgba(240,184,74,0.2); }
+        .nav-logo-img { height: 50px; width: auto; }
+        .hero { text-align: center; padding: 100px 20px; font-family: 'Cinzel', serif; }
+        .social-links { display: flex; gap: 25px; justify-content: center; padding: 40px; }
+        .social-icon { font-size: 2rem; transition: transform 0.3s; }
+        .social-icon:hover { transform: translateY(-5px); }
+        .fa-twitter { color: #1DA1F2; } .fa-instagram { color: #E1306C; } .fa-discord { color: #5865F2; }
+        
+        /* Ticket Form Styling */
+        .support-section { max-width: 600px; margin: 50px auto; padding: 20px; background: #12121a; border: 1px solid var(--gold); border-radius: 8px; }
+        input, textarea { width: 100%; padding: 12px; margin: 10px 0; background: #1a1a28; border: 1px solid #333; color: white; border-radius: 4px; }
+        .cta-btn { background: var(--gold); color: black; border: none; padding: 15px 30px; cursor: pointer; font-weight: bold; width: 100%; }
+    </style>
+</head>
+<body>
+
+<nav class="nav">
+    <img src="image_08d4a3.jpg" alt="Elysian Logo" class="nav-logo-img">
+    <div class="nav-links">
+        <a href="#builds">Builds</a>
+        <a href="#support">Support</a>
+    </div>
+</nav>
+
+<section class="hero">
+    <h1>Elysian PCs</h1>
+    <p>Ascend Your Gaming Experience</p>
+</section>
+
+<section id="support" class="support-section">
+    <h2 style="text-align:center; color: var(--gold);">Open a Support Ticket</h2>
+    <form id="ticket-form">
+        <input type="text" id="user_name" placeholder="Full Name" required>
+        <input type="email" id="user_email" placeholder="Email Address" required>
+        <textarea id="message" rows="5" placeholder="Tell us about your dream PC or an issue you're having..." required></textarea>
+        <button type="submit" class="cta-btn">Submit Ticket</button>
+    </form>
+</section>
+
+<div class="social-links">
+    <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+    <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+    <a href="#" class="social-icon"><i class="fab fa-discord"></i></a>
+</div>
 
 <script>
-  // Initialize EmailJS with your provided Public Key
-  emailjs.init("9CNRBFJzrjkM4BrNT");
+    // 1. Initialize EmailJS
+    emailjs.init("9CNRBFJzrjkM4BrNT");
 
-  // 1. GLOBAL ADMIN SYNC
-  // Replaces your old loadData() to fetch from Cloudflare KV instead of local storage
-  async function loadData() {
-    const response = await fetch('/api/pcs');
-    const globalPcs = await response.json();
-    if (globalPcs.length > 0) {
-      pcs = globalPcs; // Update the local 'pcs' array used by your card generator
-      renderPCs();
-    }
-  }
+    // 2. Ticket Submission Logic
+    document.getElementById('ticket-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const btn = this.querySelector('button');
+        btn.textContent = "Sending...";
 
-  // 2. STRIPE CHECKOUT
-  async function handleCheckout() {
-    const stripe = Stripe('pk_test_51T7SnfLAAINeFFlcIKP0QSIMwWTg5t4fL3ejZfi7huzcdohMdnxpDmIujc7T0kOuC11enUWIblN7DPcVU9CvirOW008lA920Ps');
-    
-    const response = await fetch('/api/checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cart: cartItems })
+        const params = {
+            from_name: document.getElementById('user_name').value,
+            from_email: document.getElementById('user_email').value,
+            message: document.getElementById('message').value,
+            to_email: 'd4yohero@gmail.com'
+        };
+
+        // Replace 'YOUR_SERVICE_ID' and 'YOUR_TEMPLATE_ID' with yours from EmailJS Dashboard
+        emailjs.send("default_service", "YOUR_TEMPLATE_ID", params)
+            .then(() => {
+                alert("Ticket sent! We will contact you at " + params.from_email);
+                this.reset();
+                btn.textContent = "Submit Ticket";
+            }, (err) => {
+                alert("Failed to send. Please try again.");
+                btn.textContent = "Submit Ticket";
+            });
     });
-    
-    const session = await response.json();
-    await stripe.redirectToCheckout({ sessionId: session.id });
-  }
 
-  // 3. EMAIL TICKET SYSTEM
-  async function sendTicket(e) {
-    e.preventDefault();
-    const btn = e.target.querySelector('button');
-    btn.textContent = "Sending...";
-
-    const params = {
-      from_name: document.getElementById('ticket-name').value,
-      from_email: document.getElementById('ticket-email').value,
-      message: document.getElementById('ticket-msg').value,
-      to_email: 'd4yohero@gmail.com'
-    };
-
-    emailjs.send("default_service", "template_id_here", params)
-      .then(() => {
-        showToast("Ticket sent to Elysian support!");
-        e.target.reset();
-        btn.textContent = "Send Ticket";
-      });
-  }
+    // 3. Global Admin / KV Fetch
+    async function syncGlobalData() {
+        try {
+            const res = await fetch('/api/pcs');
+            const data = await res.json();
+            console.log("Global Data Loaded:", data);
+            // Here you would trigger your render function for the PC cards
+        } catch (e) {
+            console.log("Cloudflare KV not connected yet.");
+        }
+    }
+    syncGlobalData();
 </script>
+
+</body>
+</html>
