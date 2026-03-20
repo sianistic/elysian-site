@@ -6,7 +6,7 @@
   <title>Builds — Elysian PCs</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Atkinson+Hyperlegible+Next:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
   <link rel="stylesheet" href="style.css">
   <style>
@@ -211,6 +211,81 @@
     .skel-text.lg { width: 80%; }
     .skel-btn  { height: 44px; border-radius: var(--radius-sm); margin-top: 1rem; }
 
+
+    /* ── Bookmark Toggle (shadcn-inspired) ── */
+    .bookmark-btn {
+      position: absolute;
+      top: 0.6rem;
+      right: 0.6rem;
+      z-index: 20;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-glass);
+      backdrop-filter: blur(8px);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      opacity: 0;
+    }
+    .pc-card:hover .bookmark-btn { opacity: 1; }
+    .bookmark-btn:hover {
+      background: rgba(99, 102, 241, 0.1);
+      border-color: rgba(99, 102, 241, 0.4);
+      color: #6366f1;
+    }
+    .bookmark-btn.bookmarked {
+      opacity: 1;
+      background: rgba(99, 102, 241, 0.12);
+      border-color: rgba(99, 102, 241, 0.5);
+      color: #6366f1;
+    }
+    .bookmark-btn.bookmarked svg { fill: #6366f1; }
+
+    /* ── Tooltip ── */
+    .bookmark-wrap {
+      position: absolute;
+      top: 0.6rem;
+      right: 0.6rem;
+      z-index: 20;
+    }
+    .tooltip-box {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      white-space: nowrap;
+      box-shadow: var(--shadow-card);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-4px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+    .bookmark-btn:hover + .tooltip-box,
+    .bookmark-btn:focus + .tooltip-box {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── Saved chip indicator dot ── */
+    .filter-chip .chip-dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #6366f1;
+      margin-left: 5px;
+      vertical-align: middle;
+    }
     @media (max-width: 1024px) { #builds-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 640px)  { #builds-grid { grid-template-columns: 1fr; } }
   </style>
@@ -242,6 +317,7 @@
       <button class="filter-chip" data-filter="gaming">Gaming</button>
       <button class="filter-chip" data-filter="creator">Creator</button>
       <button class="filter-chip" data-filter="entry">Entry Luxury</button>
+      <button class="filter-chip" data-filter="saved" id="chip-saved">Saved <span class="chip-dot" id="saved-dot" style="display:none"></span></button>
     </div>
 
     <div id="builds-grid"></div>
@@ -523,6 +599,56 @@ function galleryPrev(id, event) {
   if (s) galleryGoTo(id, (s.index - 1 + s.images.length) % s.images.length, null);
 }
 
+/* ── Bookmark Engine ── */
+const BOOKMARK_KEY = 'elysian-bookmarks';
+
+function getBookmarks() {
+  try { return JSON.parse(localStorage.getItem(BOOKMARK_KEY)) || []; }
+  catch { return []; }
+}
+
+function isBookmarked(id) { return getBookmarks().includes(id); }
+
+function toggleBookmark(id, event) {
+  if (event) event.stopPropagation();
+  const saved = getBookmarks();
+  const idx = saved.indexOf(id);
+  if (idx === -1) saved.push(id);
+  else saved.splice(idx, 1);
+  localStorage.setItem(BOOKMARK_KEY, JSON.stringify(saved));
+
+  // Update all bookmark buttons for this id
+  document.querySelectorAll(`.bookmark-btn[data-id="${id}"]`).forEach(btn => {
+    const bookmarked = saved.includes(id);
+    btn.classList.toggle('bookmarked', bookmarked);
+    btn.setAttribute('aria-pressed', bookmarked);
+    // Update tooltip text
+    const tooltip = btn.nextElementSibling;
+    if (tooltip) tooltip.textContent = bookmarked ? 'Remove bookmark' : 'Bookmark this';
+  });
+
+  updateSavedChip();
+
+  // If currently viewing "saved" filter, re-render
+  const activeChip = document.querySelector('.filter-chip.active');
+  if (activeChip && activeChip.dataset.filter === 'saved') {
+    renderBuilds(currentPCs, 'saved');
+  }
+
+  const pc = currentPCs.find(p => p.id === id);
+  if (pc) {
+    Toast[saved.includes(id) ? 'info' : 'info'](
+      saved.includes(id) ? `"${pc.name}" saved to bookmarks.` : `"${pc.name}" removed from bookmarks.`
+    );
+  }
+}
+
+function updateSavedChip() {
+  const count = getBookmarks().length;
+  const dot = document.getElementById('saved-dot');
+  if (dot) dot.style.display = count > 0 ? 'inline-block' : 'none';
+}
+
 /* ── Card Builder ── */
 function createPCCard(pc) {
   const images = Array.isArray(pc.images) ? pc.images.filter(Boolean) : [];
@@ -531,12 +657,27 @@ function createPCCard(pc) {
   const card = document.createElement('div');
   card.className = 'card pc-card reveal';
   card.dataset.category = pc.category;
+  card.style.position = 'relative';
 
   const specsPreview = Object.entries(pc.specs).slice(0, 4);
+  const saved = isBookmarked(pc.id);
 
   card.innerHTML = `
     ${buildGalleryHTML(pc.id, images, 240)}
     ${pc.badge ? `<div class="pc-card-badge">${pc.badge}</div>` : ''}
+    <div class="bookmark-wrap">
+      <button
+        class="bookmark-btn${saved ? ' bookmarked' : ''}"
+        data-id="${pc.id}"
+        aria-pressed="${saved}"
+        aria-label="${saved ? 'Remove bookmark' : 'Bookmark this'}"
+        onclick="toggleBookmark('${pc.id}', event)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="${saved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+        </svg>
+      </button>
+      <div class="tooltip-box">${saved ? 'Remove bookmark' : 'Bookmark this'}</div>
+    </div>
     <div class="card-body">
       <div class="pc-card-title">${pc.name}</div>
       <div class="pc-card-price">$${pc.price.toLocaleString()}</div>
@@ -595,7 +736,26 @@ let currentPCs = [];
 function renderBuilds(pcs, filter = 'all') {
   const grid = document.getElementById('builds-grid');
   grid.innerHTML = '';
-  const filtered = filter === 'all' ? pcs : pcs.filter(p => p.category === filter);
+
+  let filtered;
+  if (filter === 'saved') {
+    const bookmarks = getBookmarks();
+    filtered = pcs.filter(p => bookmarks.includes(p.id));
+    if (filtered.length === 0) {
+      grid.innerHTML = `
+        <div style="grid-column:1/-1;text-align:center;padding:4rem 1rem;">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.2" style="margin:0 auto 1rem;">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+          </svg>
+          <p style="font-family:var(--font-display);font-size:0.9rem;color:var(--text-muted);letter-spacing:0.06em;">No saved builds yet.</p>
+          <p style="font-size:0.82rem;color:var(--text-muted);margin-top:0.3rem;">Click the bookmark icon on any build to save it here.</p>
+        </div>`;
+      return;
+    }
+  } else {
+    filtered = filter === 'all' ? pcs : pcs.filter(p => p.category === filter);
+  }
+
   filtered.forEach(pc => grid.appendChild(createPCCard(pc)));
   const obs = new IntersectionObserver((entries) => {
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }});
@@ -642,7 +802,7 @@ async function loadBuilds() {
   renderBuilds(currentPCs);
 }
 
-document.addEventListener('DOMContentLoaded', loadBuilds);
+document.addEventListener('DOMContentLoaded', () => { loadBuilds(); updateSavedChip(); });
 </script>
 </body>
 </html>
