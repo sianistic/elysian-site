@@ -179,51 +179,88 @@ const Cart = (() => {
 
   function total() { return get().reduce((s, i) => s + i.price, 0); }
 
+  function fmt(n) {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
+  }
+
   function render() {
-    // Update count badges
+    const items = get();
+    const c = items.length;
+
+    // ── Badge counts ──
     document.querySelectorAll('.cart-count').forEach(el => {
-      const c = count();
       el.textContent = c;
       el.style.display = c > 0 ? 'flex' : 'none';
     });
 
-    // Update cart items list
-    const list = document.getElementById('cart-items-list');
+    // ── Item count label ──
+    const countLabel = document.getElementById('cart-item-count-label');
+    if (countLabel) countLabel.textContent = `${c} item${c !== 1 ? 's' : ''}`;
+
+    const list   = document.getElementById('cart-items-list');
     const footer = document.getElementById('cart-footer');
-    const empty = document.getElementById('cart-empty');
+    const empty  = document.getElementById('cart-empty');
     if (!list) return;
 
-    const items = get();
-    list.innerHTML = '';
+    // Clear items but keep empty state el
+    Array.from(list.children).forEach(child => {
+      if (child.id !== 'cart-empty') child.remove();
+    });
 
-    if (items.length === 0) {
-      if (empty) empty.style.display = 'block';
+    if (c === 0) {
+      if (empty)  empty.style.display  = 'flex';
       if (footer) footer.style.display = 'none';
       return;
     }
 
-    if (empty) empty.style.display = 'none';
+    if (empty)  empty.style.display  = 'none';
     if (footer) footer.style.display = 'block';
 
+    // ── Render each item ──
     items.forEach(item => {
       const el = document.createElement('div');
       el.className = 'cart-item';
       el.innerHTML = `
+        <div class="cart-item-img-wrap">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(212,168,67,0.3)" stroke-width="1">
+            <rect x="2" y="3" width="20" height="14" rx="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+        </div>
         <div class="cart-item-info">
           <div class="cart-item-name">${item.name}</div>
-          <div class="cart-item-price">$${item.price.toLocaleString()}</div>
+          <div class="cart-item-per">${fmt(item.price)} per item</div>
         </div>
-        <button class="cart-item-remove" aria-label="Remove ${item.name}">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>`;
+        <div class="cart-item-right">
+          <div class="cart-item-price">${fmt(item.price)}</div>
+          <button class="cart-item-remove" aria-label="Remove ${item.name}" title="Remove">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+              <path d="M10 11v6M14 11v6"/>
+              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+            </svg>
+          </button>
+        </div>`;
       el.querySelector('.cart-item-remove').addEventListener('click', () => remove(item.id));
       list.appendChild(el);
     });
 
-    const totalEl = document.getElementById('cart-total-amount');
-    if (totalEl) totalEl.textContent = `$${total().toLocaleString()}`;
+    // ── Totals ──
+    const subtotal = total();
+    const shipping = subtotal > 0 ? 5 : 0;
+    const tax      = subtotal * 0.08;
+    const grand    = subtotal + shipping + tax;
+
+    const s  = document.getElementById('cart-subtotal');
+    const sh = document.getElementById('cart-shipping');
+    const tx = document.getElementById('cart-tax');
+    const gr = document.getElementById('cart-total-amount');
+    if (s)  s.textContent  = fmt(subtotal);
+    if (sh) sh.textContent = fmt(shipping);
+    if (tx) tx.textContent = fmt(tax);
+    if (gr) gr.textContent = fmt(grand);
   }
 
   function openCart() {
