@@ -16,31 +16,73 @@ function renderNav() {
   <!-- Cart Overlay -->
   <div id="cart-overlay" class="cart-overlay"></div>
 
-  <!-- Cart Sidebar -->
+  <!-- ═══ CART SIDEBAR ═══ -->
   <aside id="cart-sidebar" class="cart-sidebar" role="complementary" aria-label="Shopping Cart">
+
+    <!-- Header -->
     <div class="cart-header">
-      <h3>Your Build</h3>
-      <button id="cart-close" class="cart-close" aria-label="Close cart">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      <div class="cart-header-left">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--gold-pure);flex-shrink:0;">
+          <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
         </svg>
-      </button>
+        <h3>Your Shopping Cart</h3>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <span class="cart-item-count-label" id="cart-item-count-label">0 items</span>
+        <button id="cart-close" class="cart-close" aria-label="Close cart">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
     </div>
+
+    <div class="cart-divider"></div>
+
+    <!-- Scrollable Items -->
     <div class="cart-items" id="cart-items-list">
       <div id="cart-empty" class="cart-empty">
-        <div class="cart-empty-icon">🖥️</div>
-        <p class="text-muted">No builds selected yet.</p>
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="color:var(--text-muted);margin-bottom:0.75rem;">
+          <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+        </svg>
+        <p style="font-family:var(--font-display);font-size:0.85rem;letter-spacing:0.06em;margin-bottom:0.3rem;">Your cart is empty</p>
+        <p class="text-muted" style="font-size:0.8rem;">Start shopping!</p>
       </div>
     </div>
-    <div class="cart-footer" id="cart-footer" style="display:none">
-      <div class="cart-total">
-        <span class="cart-total-label">Total</span>
-        <span class="cart-total-amount" id="cart-total-amount">$0</span>
+
+    <!-- Footer: totals + checkout -->
+    <div class="cart-footer" id="cart-footer" style="display:none;">
+      <div class="cart-divider" style="margin-bottom:1.25rem;"></div>
+
+      <div class="cart-totals">
+        <div class="cart-totals-row">
+          <span>Subtotal</span>
+          <span id="cart-subtotal">$0</span>
+        </div>
+        <div class="cart-totals-row">
+          <span>Shipping</span>
+          <span id="cart-shipping">$0</span>
+        </div>
+        <div class="cart-totals-row">
+          <span>Tax (8%)</span>
+          <span id="cart-tax">$0</span>
+        </div>
       </div>
-      <button id="btn-checkout" class="btn btn-primary btn-full btn-lg">
+
+      <div class="cart-divider" style="margin:1rem 0;"></div>
+
+      <div class="cart-totals-row cart-grand-total">
+        <span>Total</span>
+        <span id="cart-total-amount">$0</span>
+      </div>
+
+      <button id="btn-checkout" class="btn btn-primary btn-full btn-lg" style="margin-top:1.25rem;">
         Proceed to Checkout
       </button>
     </div>
+
   </aside>
 
   <!-- Navbar -->
