@@ -10,9 +10,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
   <link rel="stylesheet" href="style.css">
 
-  <!-- EmailJS SDK -->
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-
   <style>
     .support-hero {
       padding: 140px 0 60px;
@@ -410,96 +407,10 @@
 
 <div id="footer-slot"></div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="partials.js"></script>
-<script src="main.js"></script>
-<script>
-  // EmailJS Init
-  (function() {
-    emailjs.init({ publicKey: '9CNRBFJzrjkM4BrNT' });
-  })();
-
-  // Progress tracker
-  const fields = ['ticket-name', 'ticket-email', 'ticket-subject', 'ticket-message'];
-  function updateProgress() {
-    const filled = fields.filter(id => document.getElementById(id)?.value.trim()).length;
-    document.getElementById('ps1').classList.toggle('filled', filled >= 1);
-    document.getElementById('ps2').classList.toggle('filled', filled >= 2);
-    document.getElementById('ps3').classList.toggle('filled', filled >= 4);
-  }
-  document.addEventListener('DOMContentLoaded', () => {
-    fields.forEach(id => document.getElementById(id)?.addEventListener('input', updateProgress));
-  });
-
-  // FAQ toggle
-  function toggleFaq(el) {
-    const item = el.closest('.faq-item');
-    item.classList.toggle('open');
-  }
-
-  // Show/hide form states
-  function showTicketForm() {
-    document.getElementById('ticket-form-wrapper').style.display = 'block';
-    document.getElementById('ticket-success').classList.remove('visible');
-    document.getElementById('ticket-error').classList.remove('visible');
-  }
-  function resetTicketForm() {
-    fields.forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
-    document.getElementById('ticket-category').selectedIndex = 0;
-    document.querySelector('input[name="priority"][value="Low"]').checked = true;
-    updateProgress();
-    showTicketForm();
-  }
-
-  // Submit ticket via EmailJS
-  async function submitTicket() {
-    const name = document.getElementById('ticket-name').value.trim();
-    const email = document.getElementById('ticket-email').value.trim();
-    const orderId = document.getElementById('ticket-order').value.trim();
-    const category = document.getElementById('ticket-category').value;
-    const priority = document.querySelector('input[name="priority"]:checked')?.value || 'Low';
-    const subject = document.getElementById('ticket-subject').value.trim();
-    const message = document.getElementById('ticket-message').value.trim();
-
-    if (!name || !email || !category || !subject || !message) {
-      Toast.error('Please fill in all required fields.');
-      return;
-    }
-
-    const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRx.test(email)) { Toast.error('Please enter a valid email address.'); return; }
-
-    const btn = document.getElementById('ticket-submit');
-    btn.disabled = true;
-    btn.innerHTML = '<span style="opacity:0.7">Sending…</span>';
-
-    const ticketId = 'ELYS-' + Date.now().toString(36).toUpperCase();
-    const timestamp = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
-
-    const params = {
-      to_email: 'd4yohero@gmail.com',
-      from_name: name,
-      from_email: email,
-      ticket_id: ticketId,
-      order_id: orderId || 'N/A',
-      category,
-      priority,
-      subject,
-      message,
-      timestamp,
-      reply_to: email
-    };
-
-    try {
-      await emailjs.send('service_tl3ndnq', 'template_us6x8o2', params);
-      document.getElementById('ticket-form-wrapper').style.display = 'none';
-      document.getElementById('ticket-success').classList.add('visible');
-      Toast.success('Ticket submitted successfully!');
-    } catch (err) {
-      document.getElementById('ticket-form-wrapper').style.display = 'none';
-      document.getElementById('ticket-error-msg').textContent = err?.text || 'An unexpected error occurred. Please try again.';
-      document.getElementById('ticket-error').classList.add('visible');
-      Toast.error('Failed to submit ticket.');
-      console.error('EmailJS error:', err);
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = '<svg width="16
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="partials.js"></sc
+<script data-cfasync="false" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script data-cfasync="false" src="partials.js"></script>
+<script data-cfasync="false" src="main.js"></script>
+<script data-cfasync="false" src="support-page.js"></script>
+</body>
+</html>
