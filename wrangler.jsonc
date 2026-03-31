@@ -1,0 +1,28 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "elysian-site",
+  "pages_build_output_dir": "./files",
+  "compatibility_date": "2026-03-31",
+  "vars": {
+    "SITE_URL": "http://localhost:8788"
+  },
+  "env": {
+    "preview": {
+      "kv_namespaces": [],
+      "vars": {
+        "SITE_URL": "https://elysian-site.pages.dev"
+      }
+    },
+    "production": {
+      "kv_namespaces": [
+        {
+          "binding": "ELYSIAN_DATA",
+          "id": "77a50bea200d4f57ae6c848528800012"
+        }
+      ],
+      "vars": {
+        "SITE_URL": "https://elysian-site.pages.dev"
+      }
+    }
+  }
+}
