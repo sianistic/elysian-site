@@ -1,0 +1,39 @@
+# ══════════════════════════════════════════════════════
+#  ELYSIAN PCS — Cloudflare Pages Configuration
+#  wrangler.toml
+# ══════════════════════════════════════════════════════
+
+name = "elysian-pcs"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "."
+
+# ── KV Namespaces ──────────────────────────────────────
+# Create the KV namespace first:
+#   npx wrangler kv:namespace create ELYSIAN_DATA
+# Then replace the id below with the one returned.
+[[kv_namespaces]]
+binding = "ELYSIAN_DATA"
+id = "77a50bea200d4f57ae6c848528800012"
+
+# For local development, use a preview KV namespace:	
+# preview_id = "77a50bea200d4f57ae6c848528800012"
+
+# ── Environment Variables ──────────────────────────────
+# Set secrets securely via dashboard or CLI:
+#   npx wrangler pages secret put STRIPE_SECRET_KEY
+#   npx wrangler pages secret put ADMIN_TOKEN
+#   npx wrangler pages secret put SITE_URL
+#
+# DO NOT put secret keys directly in this file.
+# This file is for non-sensitive configuration only.
+
+[vars]
+SITE_URL = "https://elysian-pcs.pages.dev"
+# STRIPE_SECRET_KEY = set via wrangler secret or CF dashboard
+# ADMIN_TOKEN = set via wrangler secret or CF dashboard (optional)
+
+# ── Build Configuration ────────────────────────────────
+# No build step needed — pure static HTML/CSS/JS
+# [build]
+# command = ""
+# destination = "."
