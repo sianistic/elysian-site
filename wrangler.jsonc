@@ -1,49 +1,57 @@
 {
-  "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "elysian-site",
-  "pages_build_output_dir": "./files",
-  "compatibility_date": "2026-03-31",
-  "vars": {
-    "SITE_URL": "http://localhost:8788"
-  },
-  // Required secrets for the current backend:
-  // npx wrangler pages secret put ADMIN_PASSWORD
-  // npx wrangler pages secret put STRIPE_SECRET_KEY
-  // npx wrangler pages secret put STRIPE_WEBHOOK_SECRET
-  // Bind D1 once created:
-  // npx wrangler d1 create elysian-db
-  // Then copy the database_id values below.
-  "env": {
-    "preview": {
-      // "d1_databases": [
-      //   {
-      //     "binding": "DB",
-      //     "database_name": "elysian-db-preview",
-      //     "database_id": "<preview-database-id>"
-      //   }
-      // ],
-      "kv_namespaces": [],
-      "vars": {
-        "SITE_URL": "https://elysian-site.pages.dev"
-      }
-    },
-    "production": {
-      // "d1_databases": [
-      //   {
-      //     "binding": "DB",
-      //     "database_name": "elysian-db",
-      //     "database_id": "<production-database-id>"
-      //   }
-      // ],
-      "kv_namespaces": [
-        {
-          "binding": "ELYSIAN_DATA",
-          "id": "77a50bea200d4f57ae6c848528800012"
-        }
-      ],
-      "vars": {
-        "SITE_URL": "https://elysian-site.pages.dev"
-      }
-    }
-  }
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "elysian-site",
+	"pages_build_output_dir": "./files",
+	"compatibility_date": "2026-03-31",
+	"vars": {
+		"SITE_URL": "http://localhost:8788"
+	},
+	// Required secrets for the current backend:
+	// npx wrangler pages secret put ADMIN_PASSWORD
+	// npx wrangler pages secret put STRIPE_SECRET_KEY
+	// npx wrangler pages secret put STRIPE_WEBHOOK_SECRET
+	// Bind D1 once created:
+	// npx wrangler d1 create elysian-db
+	// Then copy the database_id values below.
+	"env": {
+		"preview": {
+			// "d1_databases": [
+			//   {
+			//     "binding": "DB",
+			//     "database_name": "elysian-db-preview",
+			//     "database_id": "<preview-database-id>"
+			//   }
+			// ],
+			"kv_namespaces": [],
+			"vars": {
+				"SITE_URL": "https://elysian-site.pages.dev"
+			}
+		},
+		"production": {
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_name": "elysian-db",
+					"database_id": "6cc6b1b7-3571-4aff-b5bc-63f7ccdc0c8a"
+				}
+			],
+			"kv_namespaces": [
+				{
+					"binding": "ELYSIAN_DATA",
+					"id": "77a50bea200d4f57ae6c848528800012"
+				}
+			],
+			"vars": {
+				"SITE_URL": "https://elysian-site.pages.dev"
+			}
+		}
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "elysian-db",
+			"database_id": "6cc6b1b7-3571-4aff-b5bc-63f7ccdc0c8a",
+			"remote": true
+		}
+	]
 }
