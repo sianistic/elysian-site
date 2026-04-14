@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Elysian PCs — Luxury custom computers built for those who demand the absolute best.">
-  <title>Elysian PCs — Luxury Custom Computers</title>
+  <meta name="description" content="Elysian PCs - premium custom computers with clear buy-now and quote-first paths, secure checkout, and tracked support.">
+  <title>Elysian PCs - Premium Custom Computers</title>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -48,6 +48,15 @@
       font-weight: 900;
       letter-spacing: 0.08em;
       text-transform: uppercase;
+    }
+    .hero-helper {
+      margin-top: 1rem;
+      font-size: 0.86rem;
+      color: var(--text-secondary);
+    }
+    .hero-helper a {
+      color: var(--gold-pure);
+      text-decoration: none;
     }
     @keyframes heroWaveGold {
       0% { background-position: 0% 50%; }
@@ -265,42 +274,26 @@
       justify-content: center;
     }
 
-    /* Testimonials */
-    .testimonial {
+    /* Assurance cards */
+    .assurance-card {
       background: var(--bg-card);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
       padding: 2rem;
-      position: relative;
       transition: all var(--transition);
     }
-    .testimonial:hover { border-color: var(--border-gold); transform: translateY(-4px); }
-    .testimonial::before {
-      content: '"';
-      position: absolute;
-      top: -0.5rem; left: 1.5rem;
+    .assurance-card:hover { border-color: var(--border-gold); transform: translateY(-4px); }
+    .assurance-title {
       font-family: var(--font-display);
-      font-size: 4rem;
-      color: var(--gold-dim);
-      line-height: 1;
+      font-size: 1rem;
+      margin-bottom: 0.7rem;
+      letter-spacing: 0.05em;
     }
-    .testimonial-text {
+    .assurance-text {
       font-size: 0.93rem;
       color: var(--text-secondary);
       line-height: 1.7;
-      margin-bottom: 1.25rem;
-      padding-top: 1rem;
-    }
-    .testimonial-author {
-      font-family: var(--font-display);
-      font-size: 0.8rem;
-      color: var(--gold-pure);
-      letter-spacing: 0.08em;
-    }
-    .testimonial-role {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-top: 0.2rem;
+      margin: 0;
     }
 
     /* CTA Banner */
@@ -374,23 +367,24 @@
   <section class="hero">
     <div class="hero-bg-gradient"></div>
     <div class="hero-content animate__animated animate__fadeIn">
-      <div class="hero-eyebrow">The Pinnacle of Custom Computing</div>
+      <div class="hero-eyebrow">Signature Builds and Custom Quotes</div>
       <h1 class="hero-title hero-title-wave">
         <span class="hero-title-top">Elysian</span>
-        <span class="hero-title-main">Pcs</span>
+        <span class="hero-title-main">PCs</span>
       </h1>
       <p class="hero-subtitle">
-        Handcrafted luxury workstations and gaming rigs for creators, professionals, and those who refuse to compromise.
+        Choose a ready-to-purchase Elysian system or start a reviewed custom quote for a more tailored configuration. Every order moves through a tracked process from approval to support.
       </p>
       <div class="hero-actions">
         <a href="builds.html" class="btn btn-primary btn-lg animate__animated animate__slideInUp animate__delay-1s">
-          Explore Builds
+          Shop Signature Builds
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
-        <a href="support.html" class="btn btn-outline btn-lg animate__animated animate__slideInUp animate__delay-1s">
-          Get Support
+        <a href="request-quote.html" class="btn btn-outline btn-lg animate__animated animate__slideInUp animate__delay-1s">
+          Request a Custom Quote
         </a>
       </div>
+      <div class="hero-helper">Already have an order or active quote? <a href="support.html">Open support</a>.</div>
     </div>
     <div class="scroll-indicator">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -407,20 +401,20 @@
     <div class="container">
       <div class="stats-grid">
         <div class="stat-item">
-          <span class="stat-number">4,200+</span>
-          <span class="stat-label">Builds Delivered</span>
+          <span class="stat-number">Buy Now</span>
+          <span class="stat-label">Choose a listed configuration when the published specs already fit.</span>
         </div>
         <div class="stat-item">
-          <span class="stat-number">99.8%</span>
-          <span class="stat-label">Satisfaction Rate</span>
+          <span class="stat-number">Quote First</span>
+          <span class="stat-label">Request a custom build when you need different parts, acoustics, or styling.</span>
         </div>
         <div class="stat-item">
-          <span class="stat-number">3-Year</span>
-          <span class="stat-label">Premium Warranty</span>
+          <span class="stat-number">Stripe</span>
+          <span class="stat-label">Listed builds checkout securely online. Custom builds are priced before payment.</span>
         </div>
         <div class="stat-item">
-          <span class="stat-number">24/7</span>
-          <span class="stat-label">White-Glove Support</span>
+          <span class="stat-number">Tracked</span>
+          <span class="stat-label">Quotes, orders, and support requests stay attached to real reference IDs.</span>
         </div>
       </div>
     </div>
@@ -436,8 +430,8 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         </div>
         <div>
-          <div class="feature-title">Military-Grade Components</div>
-          <div class="feature-text">Only top-tier parts from industry-leading manufacturers.</div>
+          <div class="feature-title">Curated Configurations</div>
+          <div class="feature-text">The builds page lists ready-to-purchase systems with published pricing and specs.</div>
         </div>
       </div>
       <div class="feature-item">
@@ -445,8 +439,8 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
         </div>
         <div>
-          <div class="feature-title">Custom Cable Management</div>
-          <div class="feature-text">Artisan-sleeved cables in your chosen color palette.</div>
+          <div class="feature-title">Compatibility Review</div>
+          <div class="feature-text">Custom builds are reviewed internally before you ever receive a payment link.</div>
         </div>
       </div>
       <div class="feature-item">
@@ -454,8 +448,8 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
         </div>
         <div>
-          <div class="feature-title">White-Glove Delivery</div>
-          <div class="feature-text">Insured, tracked delivery with in-home setup available.</div>
+          <div class="feature-title">Secure Payment</div>
+          <div class="feature-text">Checkout and payment links are handled through Stripe once the order path is clear.</div>
         </div>
       </div>
       <div class="feature-item">
@@ -463,8 +457,8 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.56 2 2 0 0 1 3.58 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
         </div>
         <div>
-          <div class="feature-title">Lifetime Technical Support</div>
-          <div class="feature-text">Dedicated support engineers for every Elysian owner.</div>
+          <div class="feature-title">Tracked Follow-Up</div>
+          <div class="feature-text">Support, quote changes, and payment questions stay tied to a stored ticket or order record.</div>
         </div>
       </div>
     </div>
@@ -478,7 +472,7 @@
       <div class="section-header reveal">
         <span class="section-eyebrow">Signature Collection</span>
         <h2 class="section-title">Featured <span class="text-gold">Builds</span></h2>
-        <p class="section-subtitle">Each machine is hand-assembled and rigorously tested before it ever leaves our workshop.</p>
+        <p class="section-subtitle">These are the ready-to-purchase systems in the collection. If you want different parts or a different design direction, start with a quote instead.</p>
       </div>
 
       <div class="grid-3" id="featured-builds-grid">
@@ -604,7 +598,10 @@
       </div>
 
       <div class="text-center mt-4 reveal">
-        <a href="builds.html" class="btn btn-outline btn-lg">View All Builds</a>
+        <div class="hero-actions" style="justify-content:center;">
+          <a href="builds.html" class="btn btn-outline btn-lg">View All Builds</a>
+          <a href="request-quote.html" class="btn btn-primary btn-lg">Request a Custom Quote</a>
+        </div>
       </div>
     </div>
   </section>
@@ -624,29 +621,29 @@
         <div class="process-step reveal delay-1">
           <div class="step-number">01</div>
           <div>
-            <div class="step-title">Choose Your Build</div>
-            <div class="step-text">Browse our curated collection of pre-configured signature machines or reach out to configure a fully custom build tailored to your exact workload.</div>
+            <div class="step-title">Choose the right path</div>
+            <div class="step-text">Use the builds page when a listed configuration already fits, or request a custom quote when the system needs to be refined around your workload and preferences.</div>
           </div>
         </div>
         <div class="process-step reveal delay-2">
           <div class="step-number">02</div>
           <div>
-            <div class="step-title">Secure Checkout</div>
-            <div class="step-text">Complete your purchase via our encrypted Stripe payment system. All transactions are fully secured and protected.</div>
+            <div class="step-title">Review or checkout</div>
+            <div class="step-text">Listed builds can move through secure Stripe checkout immediately. Custom builds are reviewed, priced, and approved before payment is requested.</div>
           </div>
         </div>
         <div class="process-step reveal delay-3">
           <div class="step-number">03</div>
           <div>
-            <div class="step-title">Expert Assembly</div>
-            <div class="step-text">Your machine is hand-assembled by our master builders in our climate-controlled workshop, stress-tested for 72 hours straight.</div>
+            <div class="step-title">Confirm the build</div>
+            <div class="step-text">The final configuration, order record, and payment status stay linked so the work can be tracked cleanly from approval through fulfillment.</div>
           </div>
         </div>
         <div class="process-step reveal delay-4">
           <div class="step-number">04</div>
           <div>
-            <div class="step-title">White-Glove Delivery</div>
-            <div class="step-text">Your build arrives in a custom Elysian flight case, fully insured, with complimentary in-home setup service available nationwide.</div>
+            <div class="step-title">Stay supported</div>
+            <div class="step-text">Questions after approval or payment go into a tracked support workflow with ticket IDs, linked references, and stored history.</div>
           </div>
         </div>
       </div>
@@ -659,24 +656,21 @@
   <section class="section" style="background: var(--bg-secondary);">
     <div class="container">
       <div class="section-header reveal">
-        <span class="section-eyebrow">Client Voices</span>
-        <h2 class="section-title">What Our <span class="text-gold">Clients</span> Say</h2>
+        <span class="section-eyebrow">Purchase With Clarity</span>
+        <h2 class="section-title">Know <span class="text-gold">What Happens</span> Next</h2>
       </div>
       <div class="grid-3">
-        <div class="testimonial reveal delay-1">
-          <p class="testimonial-text">The Sovereign X is hands-down the most powerful and beautiful machine I've ever owned. The cable management alone is a work of art.</p>
-          <div class="testimonial-author">Marcus K.</div>
-          <div class="testimonial-role">3D Artist & Director</div>
+        <div class="assurance-card reveal delay-1">
+          <div class="assurance-title">Listed builds are for immediate checkout</div>
+          <p class="assurance-text">Use the published collection when you want a clearly priced configuration you can add to cart and purchase now.</p>
         </div>
-        <div class="testimonial reveal delay-2">
-          <p class="testimonial-text">I've used a dozen different custom builders. Elysian is in a completely different league. The attention to detail is unreal.</p>
-          <div class="testimonial-author">Priya S.</div>
-          <div class="testimonial-role">Senior Software Engineer</div>
+        <div class="assurance-card reveal delay-2">
+          <div class="assurance-title">Custom systems begin with review</div>
+          <p class="assurance-text">If you need different parts, tighter acoustic goals, or a specific visual direction, the quote path gives you compatibility review before payment.</p>
         </div>
-        <div class="testimonial reveal delay-3">
-          <p class="testimonial-text">From ordering to white-glove setup at my studio, the entire experience was flawless. This is what premium truly means.</p>
-          <div class="testimonial-author">Damian V.</div>
-          <div class="testimonial-role">Professional Esports Athlete</div>
+        <div class="assurance-card reveal delay-3">
+          <div class="assurance-title">Support stays tied to the work</div>
+          <p class="assurance-text">Orders, quotes, and support tickets keep reference IDs so follow-up stays traceable instead of starting over each time.</p>
         </div>
       </div>
     </div>
@@ -688,11 +682,11 @@
   <section class="section">
     <div class="container reveal">
       <div class="cta-banner">
-        <h2>Ready to Build <span class="text-gold">Your Legacy?</span></h2>
-        <p>Join thousands of professionals who trust Elysian PCs to power their most demanding work.</p>
+        <h2>Ready to Choose <span class="text-gold">Your Path?</span></h2>
+        <p>Shop a listed build today or start a custom quote for a reviewed configuration with pricing before payment.</p>
         <div class="hero-actions">
           <a href="builds.html" class="btn btn-primary btn-lg">Shop All Builds</a>
-          <a href="support.html" class="btn btn-outline btn-lg">Talk to an Expert</a>
+          <a href="request-quote.html" class="btn btn-outline btn-lg">Request a Quote</a>
         </div>
       </div>
     </div>

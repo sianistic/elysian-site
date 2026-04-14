@@ -1,5 +1,6 @@
 import { jsonResponse } from "../../_lib/http.js";
 import { createBalancePaymentLink, getOrderDetail, listOrders } from "../../_lib/orders.js";
+import { getFeatureConfigError } from "../../_lib/runtime.js";
 import { requireAdminSession } from "../../_lib/session.js";
 
 const CORS_HEADERS = {
@@ -52,6 +53,11 @@ export async function onRequestPost(context) {
     }
 
     if (action === "create_balance_payment_link") {
+      const configError = getFeatureConfigError(context.env, "payment_links");
+      if (configError) {
+        return jsonResponse({ error: configError }, 500, CORS_HEADERS);
+      }
+
       const paymentLink = await createBalancePaymentLink(context.env, orderId);
       return jsonResponse(
         {

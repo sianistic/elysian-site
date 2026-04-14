@@ -1,5 +1,6 @@
 import { jsonResponse } from "../_lib/http.js";
 import { createCatalogOrder, createPaymentLinkForOrder } from "../_lib/orders.js";
+import { getFeatureConfigError } from "../_lib/runtime.js";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -13,9 +14,10 @@ export async function onRequestOptions() {
 
 export async function onRequestPost({ request, env }) {
   try {
-    if (!env.DB) {
+    const configError = getFeatureConfigError(env, "checkout");
+    if (configError) {
       return jsonResponse(
-        { error: "Checkout requires the D1 binding `DB` to be configured." },
+        { error: configError },
         500,
         CORS_HEADERS
       );

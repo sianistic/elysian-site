@@ -1,4 +1,5 @@
 import { processStripeWebhookEvent } from "../../_lib/orders.js";
+import { getFeatureConfigError } from "../../_lib/runtime.js";
 import { verifyStripeWebhookSignature } from "../../_lib/stripe.js";
 
 function jsonBody(data, status = 200) {
@@ -9,8 +10,9 @@ function jsonBody(data, status = 200) {
 }
 
 export async function onRequestPost(context) {
-  if (!context.env.DB) {
-    return jsonBody({ error: "Stripe webhooks require the D1 binding `DB`." }, 500);
+  const configError = getFeatureConfigError(context.env, "stripe_webhooks");
+  if (configError) {
+    return jsonBody({ error: configError }, 500);
   }
 
   const signature = context.request.headers.get("Stripe-Signature");

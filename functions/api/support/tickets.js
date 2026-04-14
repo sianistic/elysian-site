@@ -1,4 +1,5 @@
 import { jsonResponse } from "../../_lib/http.js";
+import { getFeatureConfigError } from "../../_lib/runtime.js";
 import { createSupportTicket } from "../../_lib/support.js";
 
 const CORS_HEADERS = {
@@ -13,8 +14,9 @@ export async function onRequestOptions() {
 
 export async function onRequestPost(context) {
   try {
-    if (!context.env.DB) {
-      return jsonResponse({ error: "Support ticket storage is not configured." }, 500, CORS_HEADERS);
+    const configError = getFeatureConfigError(context.env, "support_tickets");
+    if (configError) {
+      return jsonResponse({ error: configError }, 500, CORS_HEADERS);
     }
 
     const body = await context.request.json();

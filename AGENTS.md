@@ -1,55 +1,39 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-This repository is a Cloudflare Pages site with static assets in `files/` and Pages Functions in `functions/api/`.
+This repo is a Cloudflare Pages storefront. Public pages and browser scripts live in `files/`, while Pages Functions live in `functions/`.
 
-- `files/`: public pages, browser JS, CSS, and images (`index.html`, `builds.html`, `main.js`, `style.css`, `assets/logo.jpg`)
-- `functions/api/`: serverless endpoints for checkout and catalog data (`checkout.js`, `pcs.js`)
-- `components/ui/`: dormant React/TSX handoff components; they are not part of the live site build
-- `wrangler.jsonc`: Pages output, compatibility date, KV bindings, and environment vars
+- `files/`: public pages, shared UI scripts, CSS, and assets (`index.html`, `builds.html`, `request-quote.html`, `support.html`, `main.js`, `partials.js`, `style.css`)
+- `files/admin/`: routed admin surface and supporting admin scripts
+- `functions/api/`: checkout, admin, quote, support, and Stripe webhook endpoints
+- `functions/_lib/`: shared server helpers for sessions, orders, notifications, support, and runtime checks
+- `db/`: D1 schema and incremental migrations
+- `components/ui/`: dormant React/TSX handoff components; not part of the live site build
 
 ## Build, Test, and Development Commands
-There is no `package.json` or formal build step. Cloudflare serves `files/` directly.
+There is no `package.json` build pipeline. Cloudflare serves `files/` directly.
 
 - `npx wrangler pages dev files`: run the site locally with Pages Functions
-- `npx wrangler pages deploy files --project-name=elysian-site`: deploy the static site and functions
-- `npx wrangler kv:namespace create ELYSIAN_DATA`: create the KV namespace used by `functions/api/pcs.js`
-- `npx wrangler pages secret put STRIPE_SECRET_KEY`: set Stripe secret for `/api/checkout`
-- `npx wrangler pages secret put ADMIN_TOKEN`: set admin auth for catalog updates
+- `npx wrangler pages deploy files --project-name=elysian-site`: deploy Pages output
+- `npx wrangler d1 execute elysian-db --remote --file=db/schema.sql`: bootstrap a fresh production D1 database
+- `npx wrangler d1 execute elysian-db --remote --file=db/migration_0005_notifications_and_ops.sql`: apply a specific incremental migration
+- `node --check files/partials.js`: quick syntax check for a touched browser script
+- `git diff --check`: catch whitespace and patch-format issues before commit
 
 ## Coding Style & Naming Conventions
-Use 2-space indentation in JavaScript, semicolons, and double quotes to match the existing code. Keep client scripts in plain browser JavaScript and keep Pages Functions framework-free.
-
-Use lowercase kebab-case for HTML filenames (`support.html`) and data IDs (`sovereign-x`). Export Cloudflare handlers as `onRequestGet`, `onRequestPost`, and `onRequestOptions`.
+Use plain browser JavaScript and framework-free Pages Functions. Match the existing style: 2-space indentation, semicolons, and double quotes in JS. Keep filenames lowercase kebab-case (`request-quote.html`), and keep Cloudflare handlers exported as `onRequestGet`, `onRequestPost`, or `onRequestOptions`.
 
 ## Testing Guidelines
-There is no automated test suite yet. Validate changes with local Pages dev and manual smoke tests:
+There is no full automated suite yet, so use targeted checks and smoke tests.
 
-- open the affected page in `wrangler pages dev`
-- verify API responses for `/api/pcs` and `/api/checkout`
-- confirm admin flows and checkout redirects still work
+- run `npx wrangler pages dev files`
+- verify `/api/pcs`, `/api/quotes/request`, `/api/support/tickets`, `/api/admin/*`, and `/api/stripe/webhook`
+- confirm admin login, quote flow, support ticket flow, and Stripe-driven order updates
 
-If you add automated tests, keep them next to the code they cover or under a top-level `tests/` directory, and name them after the target module (example: `pcs.test.js`).
+If you add tests, keep them in `tests/` or next to the module they cover and name them after the workflow (`order-lifecycle.test.mjs`).
 
 ## Commit & Pull Request Guidelines
-Recent history uses short, imperative commit subjects such as `Restore production stylesheet` and `Flatten repo root for Pages deployment`. Follow that pattern: one-line, present tense, outcome-focused.
-
-Pull requests should include a concise summary, note any Cloudflare config or secret changes, link the related issue when applicable, and attach screenshots for UI changes to pages under `files/`.
+Use short, imperative commit subjects such as `Bind production D1 database`. PRs should summarize user-facing impact, list required Cloudflare config or migration steps, and include screenshots for changes under `files/`.
 
 ## Security & Configuration Tips
-Do not commit live secrets. Keep `STRIPE_SECRET_KEY` and `ADMIN_TOKEN` in Cloudflare secrets, keep `SITE_URL` accurate in `wrangler.jsonc`, and treat `files/admin.html` credentials as setup defaults that must be changed before production.
-
-## Project Goals
-This site is a custom PC brand/storefront. Priorities are:
-- smooth performance on mid-range desktop PCs
-- preserving the premium visual feel while reducing GPU-heavy effects
-- completing and hardening Stripe checkout
-- keeping deployment compatible with Cloudflare Pages and Pages Functions
-
-## Assistant Behavior
-Before making large changes:
-- explain what is currently happening
-- identify risks and dependencies
-- ask questions if business logic is unclear
-
-Prefer improving the current static/Cloudflare setup over introducing a new framework unless explicitly requested.
+Do not commit live secrets. Required production config now includes `DB`, `ADMIN_PASSWORD`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `SITE_URL`. Customer notifications also require `RESEND_API_KEY` and `NOTIFY_FROM_EMAIL`; `ADMIN_ALERT_EMAIL` is strongly recommended. Preview deployments need their own D1 binding or admin, quotes, checkout, and support flows will fail by design.

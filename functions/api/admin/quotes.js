@@ -7,6 +7,7 @@ import {
   normalizeQuoteConfigSnapshot,
   updateQuoteReview,
 } from "../../_lib/orders.js";
+import { getFeatureConfigError } from "../../_lib/runtime.js";
 import { requireAdminSession } from "../../_lib/session.js";
 
 const CORS_HEADERS = {
@@ -74,6 +75,11 @@ export async function onRequestPost(context) {
     }
 
     if (action === "create_payment_link") {
+      const configError = getFeatureConfigError(context.env, "payment_links");
+      if (configError) {
+        return jsonResponse({ error: configError }, 500, CORS_HEADERS);
+      }
+
       if (quote.status !== "approved" && quote.status !== "payment_ready") {
         return jsonResponse({ error: "Quote must be approved before a payment link can be created." }, 400, CORS_HEADERS);
       }

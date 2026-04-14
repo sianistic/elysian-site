@@ -10,6 +10,13 @@
 	// npx wrangler pages secret put ADMIN_PASSWORD
 	// npx wrangler pages secret put STRIPE_SECRET_KEY
 	// npx wrangler pages secret put STRIPE_WEBHOOK_SECRET
+	// npx wrangler pages secret put RESEND_API_KEY
+	// npx wrangler pages secret put NOTIFY_FROM_EMAIL
+	// npx wrangler pages secret put ADMIN_ALERT_EMAIL
+	// Optional notification webhook mirror:
+	// npx wrangler pages secret put NOTIFY_WEBHOOK_URL
+	// npx wrangler pages secret put NOTIFY_WEBHOOK_BEARER_TOKEN
+	// npx wrangler pages secret put NOTIFY_WEBHOOK_SECRET
 	// Bind D1 once created:
 	// npx wrangler d1 create elysian-db
 	// Then copy the database_id values below.

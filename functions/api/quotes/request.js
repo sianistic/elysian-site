@@ -1,5 +1,6 @@
 import { jsonResponse } from "../../_lib/http.js";
 import { createNotifier } from "../../_lib/notifications.js";
+import { assertFeatureConfig, getFeatureConfigError } from "../../_lib/runtime.js";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -18,9 +19,11 @@ export async function onRequestOptions() {
 
 export async function onRequestPost(context) {
   try {
-    if (!context.env.DB) {
-      return jsonResponse({ error: "Quote storage is not configured." }, 500, CORS_HEADERS);
+    const configError = getFeatureConfigError(context.env, "quote_requests");
+    if (configError) {
+      return jsonResponse({ error: configError }, 500, CORS_HEADERS);
     }
+    assertFeatureConfig(context.env, "quote_requests");
 
     const body = await context.request.json();
     const customerName = String(body?.name || "").trim();
@@ -51,12 +54,37 @@ export async function onRequestPost(context) {
       .bind(quoteId, customerName, customerEmail, JSON.stringify(requestSnapshot))
       .run();
 
+    console.info("Quote request created", {
+      quoteId,
+      customerEmail,
+      useCase,
+    });
+
     const notifier = createNotifier(context.env);
-    void notifier.send({
+    await notifier.send({
       template: "quote-request-created",
+      eventType: "quote.request.created.customer",
+      entityType: "quote",
+      entityId: quoteId,
       to: customerEmail,
       subject: `Elysian quote request ${quoteId} received`,
-      data: { quoteId, customerName, budget, useCase, timeframe },
+      data: { quoteId, customerName, budget, useCase, timeframe, siteUrl: context.env.SITE_URL },
+    });
+
+    await notifier.sendOperationalAlert({
+      eventType: "quote.request.created",
+      entityType: "quote",
+      entityId: quoteId,
+      subject: `New quote request ${quoteId}`,
+      message: `${customerName} submitted a custom quote request.`,
+      data: {
+        quoteId,
+        customerName,
+        customerEmail,
+        budget,
+        useCase,
+        timeframe,
+      },
     });
 
     return jsonResponse(

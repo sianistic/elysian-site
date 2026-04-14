@@ -189,6 +189,7 @@ function formatMoneyFromCents(cents) {
 var adminQuotes = [];
 var adminOrders = [];
 var adminTickets = [];
+var adminOpsStatus = null;
 var activeQuoteId = null;
 var adminInitialized = false;
 
@@ -306,7 +307,12 @@ async function refreshAdminData(silent) {
 
     await loadCatalogData();
     renderTable();
-    await Promise.all([loadQuotes(), loadOrders(), loadTickets()]);
+    await Promise.all([
+      loadQuotes(),
+      loadOrders(),
+      loadTickets(),
+      typeof loadOperationalStatus === 'function' ? loadOperationalStatus() : Promise.resolve()
+    ]);
     updateOperationsContext();
     updateStats();
 
@@ -345,6 +351,13 @@ function countOpenTickets() {
   }).length;
 }
 
+function countOperationalIssues() {
+  if (!adminOpsStatus || !adminOpsStatus.summary) return 0;
+  return (parseInt(adminOpsStatus.summary.errors, 10) || 0)
+    + (parseInt(adminOpsStatus.summary.warnings, 10) || 0)
+    + (parseInt(adminOpsStatus.summary.failedNotifications, 10) || 0);
+}
+
 function updateBadge(id, count, label) {
   var badge = document.getElementById(id);
   if (!badge) return;
@@ -361,6 +374,7 @@ function updateWorkspaceBadges() {
   updateBadge('notif-quotes', countQuotesNeedingReview());
   updateBadge('notif-orders', countOrdersNeedingAttention());
   updateBadge('notif-tickets', countOpenTickets());
+  updateBadge('notif-operations', countOperationalIssues());
   updateBadge('notif-unsaved', hasUnsaved ? 1 : 0, hasUnsaved ? '!' : '');
 }
 
@@ -413,6 +427,14 @@ function renderOverview() {
       meta: countOpenTickets() + ' active ticket(s) and ' + highPriorityTickets + ' high-priority conversation(s) still need admin follow-up.',
       actionLabel: 'Open Tickets',
       action: 'switchView("support")'
+    });
+  }
+  if (adminOpsStatus && adminOpsStatus.summary && (adminOpsStatus.summary.errors || adminOpsStatus.summary.warnings || adminOpsStatus.summary.failedNotifications)) {
+    items.push({
+      title: 'Operational readiness needs attention',
+      meta: (adminOpsStatus.summary.errors || 0) + ' config error(s), ' + (adminOpsStatus.summary.warnings || 0) + ' warning(s), and ' + (adminOpsStatus.summary.failedNotifications || 0) + ' recent notification failure(s) need review.',
+      actionLabel: 'Open Operations',
+      action: 'switchView("operations")'
     });
   }
 

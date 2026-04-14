@@ -1,4 +1,5 @@
 import { jsonResponse } from "../../_lib/http.js";
+import { getFeatureConfigError } from "../../_lib/runtime.js";
 import { buildSessionCookie, createAdminSession, verifyAdminPassword } from "../../_lib/session.js";
 
 const CORS_HEADERS = {
@@ -13,9 +14,10 @@ export async function onRequestOptions() {
 
 export async function onRequestPost(context) {
   try {
-    if (!context.env.DB) {
+    const configError = getFeatureConfigError(context.env, "admin_auth");
+    if (configError) {
       return jsonResponse(
-        { error: "Admin login requires the D1 binding `DB` to be configured." },
+        { error: configError },
         500,
         CORS_HEADERS
       );

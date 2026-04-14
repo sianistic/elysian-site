@@ -89,9 +89,9 @@ function renderNav() {
 
   <div class="site-ribbon" role="presentation">
     <div class="site-ribbon-inner">
-      <span>Hand-built in the U.S.</span>
-      <span>3-year premium warranty</span>
-      <span>Concierge support 7 days a week</span>
+      <span>Signature builds available now</span>
+      <span>Custom quotes reviewed before payment</span>
+      <span>Secure Stripe checkout and tracked support</span>
       <a href="request-quote.html">Plan a custom build</a>
     </div>
   </div>
@@ -111,7 +111,7 @@ function renderNav() {
 
     <div class="nav-actions">
       <a href="request-quote.html" class="nav-cta">
-        Start Build
+        Request a Quote
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M7 17L17 7"></path>
           <path d="M8 7h9v9"></path>
@@ -144,8 +144,8 @@ function renderFooter() {
     <div class="container">
       <div class="footer-topband">
         <div>
-          <div class="footer-heading">Start With A Conversation</div>
-          <p>Tell us whether you need a flagship workstation, a creator rig, or a refined gaming build and we will point you at the right configuration.</p>
+          <div class="footer-heading">Choose The Right Path</div>
+          <p>Browse a listed build when the published configuration already fits, or request a custom quote when you want the system reviewed and refined before payment.</p>
         </div>
         <div class="footer-topband-actions">
           <a href="builds.html" class="btn btn-primary">Browse Builds</a>
@@ -156,18 +156,8 @@ function renderFooter() {
         <div class="footer-brand">
           <img src="assets/logo.jpg" alt="Elysian PCs Logo" onerror="this.style.display='none'">
           <div class="footer-brand-name text-gold">ELYSIAN PCS</div>
-          <p>Handcrafted luxury computing built for those who demand the absolute best. Every machine is a masterpiece.</p>
-          <div class="social-links">
-            <a href="#" class="social-icon twitter" aria-label="Twitter">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-            </a>
-            <a href="#" class="social-icon instagram" aria-label="Instagram">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-            </a>
-            <a href="#" class="social-icon discord" aria-label="Discord">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
-            </a>
-          </div>
+          <p>Premium systems with clearer buying paths: listed builds for immediate checkout, custom quotes for reviewed configurations, and tracked support after the sale.</p>
+          <p class="text-secondary" style="margin-top:1rem;font-size:0.82rem;">Publish public proof links only when the real profiles or case-study pages are ready.</p>
         </div>
         <div>
           <div class="footer-heading">Explore</div>
@@ -179,20 +169,19 @@ function renderFooter() {
           </ul>
         </div>
         <div>
-          <div class="footer-heading">Company</div>
+          <div class="footer-heading">Buying Paths</div>
           <ul class="footer-links">
-            <li><a href="#">About Us</a></li>
-            <li><a href="#">Warranty</a></li>
-            <li><a href="#">Shipping</a></li>
-            <li><a href="#">Returns</a></li>
+            <li><a href="builds.html">Buy a listed build</a></li>
+            <li><a href="request-quote.html">Request a custom quote</a></li>
+            <li><a href="support.html">Support an active order</a></li>
           </ul>
         </div>
         <div>
-          <div class="footer-heading">Legal</div>
+          <div class="footer-heading">What To Expect</div>
           <ul class="footer-links">
-            <li><a href="#">Privacy Policy</a></li>
-            <li><a href="#">Terms of Service</a></li>
-            <li><a href="#">Cookie Policy</a></li>
+            <li><span class="text-secondary">Custom builds are reviewed before payment is requested.</span></li>
+            <li><span class="text-secondary">Final pricing and build details are confirmed during quote approval.</span></li>
+            <li><span class="text-secondary">Support tickets stay tied to quote and order references.</span></li>
           </ul>
         </div>
       </div>

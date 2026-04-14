@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Request a Quote — Elysian PCs</title>
+  <title>Request a Quote - Elysian PCs</title>
+  <meta name="description" content="Request a reviewed custom PC quote from Elysian. Share your goals, budget, and constraints, then receive pricing before any payment is due.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
@@ -16,7 +17,7 @@
       position: relative;
     }
     .quote-hero::before {
-      content: '';
+      content: "";
       position: absolute;
       inset: 0;
       background: radial-gradient(ellipse 75% 55% at 50% 0%, var(--gold-glow), transparent 70%);
@@ -53,6 +54,32 @@
       font-size: 0.82rem;
       letter-spacing: 0.08em;
     }
+    .support-checklist {
+      list-style: none;
+      display: grid;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    .support-checklist li {
+      display: flex;
+      gap: 0.75rem;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      line-height: 1.55;
+    }
+    .check-dot {
+      width: 26px;
+      height: 26px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      border: 1px solid var(--border-gold);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold-pure);
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+    }
     .quote-status {
       display: none;
       text-align: center;
@@ -86,16 +113,16 @@
         <div class="quote-card reveal">
           <div class="quote-highlights">
             <div class="quote-note">
-              <strong>Human Review</strong>
-              <span class="text-secondary">An Elysian reviewer turns your requirements into an actual build proposal.</span>
+              <strong>Compatibility Review</strong>
+              <span class="text-secondary">Your requirements are reviewed and refined into a workable build before anything is priced for payment.</span>
             </div>
             <div class="quote-note">
-              <strong>No Forced Checkout</strong>
-              <span class="text-secondary">Custom work starts with a quote first. Payment links are sent only after review.</span>
+              <strong>No Payment Up Front</strong>
+              <span class="text-secondary">Custom work starts with a quote first. Payment links are sent only after approval.</span>
             </div>
             <div class="quote-note">
-              <strong>Deposit Ready</strong>
-              <span class="text-secondary">Approved quotes can later support either full payment or deposit-first billing.</span>
+              <strong>Secure Payment Later</strong>
+              <span class="text-secondary">Approved quotes can move to secure Stripe payment when the configuration and amount are confirmed.</span>
             </div>
           </div>
 
@@ -114,7 +141,7 @@
             <div class="grid-2">
               <div class="form-group">
                 <label class="form-label" for="quote-budget">Target Budget</label>
-                <input id="quote-budget" class="form-control" type="text" placeholder="$3,000–$5,000">
+                <input id="quote-budget" class="form-control" type="text" placeholder="$3,000-$5,000">
               </div>
               <div class="form-group">
                 <label class="form-label" for="quote-timeframe">Desired Timeframe</label>
@@ -141,7 +168,7 @@
           <div class="quote-status" id="quote-success">
             <div style="font-size:3rem;margin-bottom:1rem;">&#10003;</div>
             <h3 style="font-family:var(--font-display);font-size:1.2rem;margin-bottom:0.5rem;">Quote request received</h3>
-            <p class="text-secondary">We’ve recorded your request and queued it for review.</p>
+            <p class="text-secondary">We have recorded your request and queued it for review.</p>
             <p class="text-secondary" id="quote-success-id" style="margin-top:0.6rem;"></p>
             <button class="btn btn-outline mt-3" onclick="window.location.reload()">Submit Another Request</button>
           </div>
@@ -155,7 +182,15 @@
             <li><span class="check-dot">3</span><span>Give a real budget target so we can recommend the right tier instead of guessing high.</span></li>
           </ul>
           <div class="gold-divider" style="margin:1.5rem 0;"></div>
-          <p class="text-secondary" style="font-size:0.88rem;">Need technical help on an existing order instead? <a href="support.html">Open a support ticket</a>.</p>
+          <h3 style="font-family:var(--font-display);font-size:1rem;letter-spacing:0.08em;margin-bottom:1rem;">What happens next</h3>
+          <ul class="support-checklist">
+            <li><span class="check-dot">1</span><span>We review feasibility, compatibility, and the overall direction of the build.</span></li>
+            <li><span class="check-dot">2</span><span>We shape the internal configuration and prepare quote terms before any payment is requested.</span></li>
+            <li><span class="check-dot">3</span><span>If you approve the quote, payment is handled through a secure Stripe link tied to the quote and order record.</span></li>
+          </ul>
+          <div class="gold-divider" style="margin:1.5rem 0;"></div>
+          <p class="text-secondary" style="font-size:0.88rem;">Warranty, shipping, and final payment terms should be confirmed during quote review before you pay.</p>
+          <p class="text-secondary" style="font-size:0.88rem;margin-top:0.8rem;">Need technical help on an existing order instead? <a href="support.html">Open a support ticket</a>.</p>
         </aside>
       </div>
     </div>

@@ -270,34 +270,49 @@ async function createSupportTicket(env, input = {}) {
     },
   });
 
+  console.info("Support ticket created", {
+    ticketId,
+    requesterEmail,
+    referenceType: referenceMatch.referenceType,
+  });
+
   const notifier = createNotifier(env);
-  let notification = {
-    delivered: false,
-    provider: "noop",
-    reason: "not_attempted",
-  };
-  try {
-    notification = await notifier.send({
-      template: "support-ticket-created",
-      to: requesterEmail,
-      subject: `Elysian support ticket ${ticketId} received`,
-      data: {
-        ticketId,
-        requesterName,
-        subject,
-        category,
-        priority,
-        submittedReference: referenceMatch.submittedReference,
-      },
-    });
-  } catch (error) {
-    notification = {
-      delivered: false,
-      provider: "notification-error",
-      reason: error.message || "notification_send_failed",
-    };
-    console.error("Support ticket acknowledgement failed:", error);
-  }
+  const notification = await notifier.send({
+    template: "support-ticket-created",
+    eventType: "support.ticket.created.customer",
+    entityType: "support_ticket",
+    entityId: ticketId,
+    to: requesterEmail,
+    subject: `Elysian support ticket ${ticketId} received`,
+    data: {
+      ticketId,
+      requesterName,
+      subject,
+      category,
+      priority,
+      submittedReference: referenceMatch.submittedReference,
+      siteUrl: env.SITE_URL,
+    },
+  });
+
+  await notifier.sendOperationalAlert({
+    eventType: "support.ticket.created",
+    entityType: "support_ticket",
+    entityId: ticketId,
+    severity: priority === "high" ? "warning" : "info",
+    subject: `New support ticket ${ticketId}`,
+    message: `${requesterName} opened a ${category} ticket.`,
+    data: {
+      ticketId,
+      requesterName,
+      requesterEmail,
+      category,
+      priority,
+      subject,
+      submittedReference: referenceMatch.submittedReference,
+      referenceType: referenceMatch.referenceType,
+    },
+  });
 
   return {
     ticketId,
@@ -538,33 +553,28 @@ async function updateSupportTicket(env, input = {}) {
   }
 
   if (customerReply) {
+    console.info("Support ticket reply recorded", {
+      ticketId,
+      assignedAdmin: assignedAdmin || "Primary Admin",
+    });
+
     const notifier = createNotifier(env);
-    let notification = {
-      delivered: false,
-      provider: "noop",
-      reason: "not_attempted",
-    };
-    try {
-      notification = await notifier.send({
-        template: "support-ticket-reply",
-        to: current.requester_email,
-        subject: `Elysian support update for ${ticketId}`,
-        data: {
-          ticketId,
-          requesterName: current.requester_name,
-          subject: current.subject,
-          reply: customerReply,
-          assignedAdmin: assignedAdmin || "Primary Admin",
-        },
-      });
-    } catch (error) {
-      notification = {
-        delivered: false,
-        provider: "notification-error",
-        reason: error.message || "notification_send_failed",
-      };
-      console.error("Support ticket reply notification failed:", error);
-    }
+    const notification = await notifier.send({
+      template: "support-ticket-reply",
+      eventType: "support.ticket.reply.customer",
+      entityType: "support_ticket",
+      entityId: ticketId,
+      to: current.requester_email,
+      subject: `Elysian support update for ${ticketId}`,
+      data: {
+        ticketId,
+        requesterName: current.requester_name,
+        subject: current.subject,
+        reply: customerReply,
+        assignedAdmin: assignedAdmin || "Primary Admin",
+        siteUrl: env.SITE_URL,
+      },
+    });
 
     await insertTicketMessage(env, ticketId, {
       authorType: "admin",

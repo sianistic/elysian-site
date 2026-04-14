@@ -1,4 +1,5 @@
 import { createStripeCheckoutSession } from "./stripe.js";
+import { createNotifier } from "./notifications.js";
 
 const SHIPPING_COUNTRIES = ["US", "CA", "GB", "AU"];
 const QUOTE_COMPONENT_KEYS = ["cpu", "gpu", "ram", "storage", "motherboard", "psu", "case", "cooling"];
@@ -184,6 +185,124 @@ async function logOrderEvent(env, orderId, eventType, payload = {}, source = "sy
   )
     .bind(crypto.randomUUID(), orderId, eventType, source, JSON.stringify(payload))
     .run();
+}
+
+async function notifyQuoteApproved(env, quote, order) {
+  const notifier = createNotifier(env);
+  await notifier.sendOperationalAlert({
+    eventType: "quote.approved",
+    entityType: "quote",
+    entityId: quote.id,
+    subject: `Quote approved ${quote.id}`,
+    message: `${quote.customer_name} has an approved quote ready for payment-link generation.`,
+    data: {
+      quoteId: quote.id,
+      orderId: order?.id || "",
+      customerName: quote.customer_name,
+      customerEmail: quote.customer_email,
+      paymentMode: quote.payment_mode,
+      subtotalCents: toCents(quote.subtotal_cents),
+      depositCents: toCents(quote.deposit_cents),
+    },
+  });
+}
+
+async function notifyQuotePaymentLinkReady(env, order, paymentLink, phase, amountCents) {
+  if (order.order_type !== "quote" || !cleanText(order.customer_email) || paymentLink.reused) {
+    return;
+  }
+
+  const notifier = createNotifier(env);
+  await notifier.send({
+    template: "quote-payment-link-created",
+    eventType: "quote.payment_link.created.customer",
+    entityType: "order",
+    entityId: order.id,
+    to: order.customer_email,
+    subject: `Elysian payment link ready for ${order.quote_id || order.id}`,
+    data: {
+      customerName: order.customer_name,
+      quoteId: order.quote_id,
+      orderId: order.id,
+      paymentPhase: phase,
+      amountCents,
+      paymentUrl: paymentLink.url,
+    },
+  });
+
+  await notifier.sendOperationalAlert({
+    eventType: "quote.payment_link.created",
+    entityType: "order",
+    entityId: order.id,
+    subject: `Payment link created for ${order.quote_id || order.id}`,
+    message: `A ${formatPaymentPhase(phase)} link is ready for ${order.customer_name || order.customer_email || order.id}.`,
+    data: {
+      orderId: order.id,
+      quoteId: order.quote_id || "",
+      paymentPhase: phase,
+      amountCents,
+      paymentLinkUrl: paymentLink.url,
+      customerEmail: order.customer_email,
+    },
+  });
+}
+
+async function notifyOrderPaymentConfirmed(env, order, phase, amountCents, remainingBalanceCents) {
+  const notifier = createNotifier(env);
+
+  if (cleanText(order.customer_email)) {
+    await notifier.send({
+      template: "payment-confirmed",
+      eventType: "order.payment.confirmed.customer",
+      entityType: "order",
+      entityId: order.id,
+      to: order.customer_email,
+      subject: `Elysian payment confirmed for ${order.id}`,
+      data: {
+        customerName: order.customer_name,
+        orderId: order.id,
+        paymentPhase: phase,
+        amountCents,
+        remainingBalanceCents,
+      },
+    });
+  }
+
+  await notifier.sendOperationalAlert({
+    eventType: "order.payment.confirmed",
+    entityType: "order",
+    entityId: order.id,
+    subject: `Payment confirmed for ${order.id}`,
+    message: `${formatMoney(amountCents)} was confirmed for ${order.customer_email || order.id}.`,
+    data: {
+      orderId: order.id,
+      quoteId: order.quote_id || "",
+      paymentPhase: phase,
+      amountCents,
+      remainingBalanceCents,
+      paymentMode: order.payment_mode,
+      paymentStatus: remainingBalanceCents > 0 ? "partially_paid" : "paid",
+    },
+  });
+}
+
+async function notifyOrderPaymentIssue(env, order, phase, issueType, details = {}) {
+  const notifier = createNotifier(env);
+  await notifier.sendOperationalAlert({
+    eventType: `order.payment.${issueType}`,
+    entityType: "order",
+    entityId: order.id,
+    severity: issueType === "failed" ? "warning" : "info",
+    subject: `Payment ${issueType} for ${order.id}`,
+    message: `${formatPaymentPhase(phase)} for ${order.customer_email || order.id} is now ${issueType}.`,
+    data: {
+      orderId: order.id,
+      quoteId: order.quote_id || "",
+      paymentPhase: phase,
+      paymentMode: order.payment_mode,
+      ...details,
+    },
+  });
 }
 
 async function getQuoteRow(env, quoteId) {
@@ -433,7 +552,18 @@ async function updateQuoteReview(env, quoteRow, review, action) {
       .run();
   }
 
-  return getQuoteRow(env, quoteRow.id);
+  const updatedQuote = await getQuoteRow(env, quoteRow.id);
+  const linkedOrder = existingOrder || null;
+
+  if (action === "approve" && updatedQuote) {
+    console.info("Quote approved", {
+      quoteId: updatedQuote.id,
+      paymentMode: updatedQuote.payment_mode,
+    });
+    await notifyQuoteApproved(env, updatedQuote, linkedOrder);
+  }
+
+  return updatedQuote;
 }
 
 async function createCatalogOrder(env, items) {
@@ -591,13 +721,24 @@ async function createPaymentLinkForOrder(env, order, options = {}) {
     sessionId: session.id,
   }, "admin");
 
-  return {
+  const paymentLink = {
     reused: false,
     url: session.url,
     orderId: order.id,
     sessionId: session.id,
     paymentSessionId,
   };
+
+  console.info("Payment link created", {
+    orderId: order.id,
+    phase,
+    amountCents,
+    sessionId: session.id,
+  });
+
+  await notifyQuotePaymentLinkReady(env, order, paymentLink, phase, amountCents);
+
+  return paymentLink;
 }
 
 async function createQuoteInitialPaymentLink(env, quoteRow) {
@@ -739,6 +880,27 @@ async function processSuccessfulCheckoutSession(env, session) {
     paymentIntentId: session.payment_intent,
     amountCents: increment,
   }, "stripe_webhook");
+
+  console.info("Stripe payment confirmed", {
+    orderId: order.id,
+    sessionId: session.id,
+    paymentPhase: resolvedPaymentSession.payment_phase,
+    amountCents: increment,
+  });
+
+  await notifyOrderPaymentConfirmed(
+    env,
+    {
+      ...order,
+      customer_name: cleanText(session.customer_details?.name || session.customer_details?.email || order.customer_name || ""),
+      customer_email: cleanText(session.customer_details?.email || session.customer_email || order.customer_email || ""),
+      payment_mode: order.payment_mode,
+      quote_id: order.quote_id,
+    },
+    resolvedPaymentSession.payment_phase,
+    increment,
+    lifecycle.balanceDueCents
+  );
 }
 
 async function processExpiredCheckoutSession(env, session) {
@@ -812,6 +974,16 @@ async function processExpiredCheckoutSession(env, session) {
     sessionId: session.id,
     paymentPhase: resolvedPaymentSession.payment_phase,
   }, "stripe_webhook");
+
+  console.warn("Stripe payment link expired", {
+    orderId: order.id,
+    sessionId: session.id,
+    paymentPhase: resolvedPaymentSession.payment_phase,
+  });
+
+  await notifyOrderPaymentIssue(env, order, resolvedPaymentSession.payment_phase, "expired", {
+    sessionId: session.id,
+  });
 }
 
 async function processFailedPaymentIntent(env, paymentIntent) {
@@ -886,6 +1058,18 @@ async function processFailedPaymentIntent(env, paymentIntent) {
     paymentPhase: resolvedPaymentSession.payment_phase,
     lastPaymentError: paymentIntent.last_payment_error?.message || "",
   }, "stripe_webhook");
+
+  console.warn("Stripe payment failed", {
+    orderId: order.id,
+    paymentIntentId: paymentIntent.id,
+    paymentPhase: resolvedPaymentSession.payment_phase,
+    lastPaymentError: paymentIntent.last_payment_error?.message || "",
+  });
+
+  await notifyOrderPaymentIssue(env, order, resolvedPaymentSession.payment_phase, "failed", {
+    paymentIntentId: paymentIntent.id,
+    lastPaymentError: paymentIntent.last_payment_error?.message || "",
+  });
 }
 
 async function processStripeWebhookEvent(env, event) {
