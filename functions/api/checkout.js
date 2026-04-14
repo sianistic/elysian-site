@@ -1,16 +1,5 @@
-/**
- * ELYSIAN PCS - Cloudflare Pages Function
- * /functions/api/checkout.js
- *
- * POST /api/checkout
- * Accepts cart items, creates a Stripe Checkout session,
- * and returns the redirect URL. Stripe Secret Key is stored
- * in Cloudflare Pages environment variables (never in client JS).
- *
- * Required env vars:
- *   STRIPE_SECRET_KEY - sk_test_... or sk_live_...
- *   SITE_URL - https://your-domain.pages.dev (no trailing slash)
- */
+import { jsonResponse } from "../_lib/http.js";
+import { createCatalogOrder, createPaymentLinkForOrder } from "../_lib/orders.js";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -18,102 +7,44 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
-function jsonResponse(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { ...CORS_HEADERS, "Content-Type": "application/json" }
-  });
-}
-
 export async function onRequestOptions() {
   return new Response(null, { status: 204, headers: CORS_HEADERS });
 }
 
 export async function onRequestPost({ request, env }) {
   try {
-    const stripeKey = env.STRIPE_SECRET_KEY;
-    if (!stripeKey) {
-      return jsonResponse({ error: "Stripe secret key not configured. Set STRIPE_SECRET_KEY in environment variables." }, 500);
+    if (!env.DB) {
+      return jsonResponse(
+        { error: "Checkout requires the D1 binding `DB` to be configured." },
+        500,
+        CORS_HEADERS
+      );
     }
-
-    const siteUrl = env.SITE_URL || "http://localhost:8788";
 
     const body = await request.json();
-    const { items } = body;
+    const items = Array.isArray(body?.items) ? body.items : [];
 
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return jsonResponse({ error: "Cart is empty or invalid." }, 400);
+    if (!items.length) {
+      return jsonResponse({ error: "Cart is empty or invalid." }, 400, CORS_HEADERS);
     }
 
-    const lineItems = items.map(item => {
-      const unitAmount = Math.round(Math.max(1, parseFloat(item.price) || 0) * 100);
-      return {
-        price_data: {
-          currency: "usd",
-          product_data: {
-            name: String(item.name || "Elysian Build").slice(0, 255),
-            description: "Handcrafted luxury custom PC by Elysian PCs",
-            metadata: {
-              build_id: String(item.id || "").slice(0, 64)
-            }
-          },
-          unit_amount: unitAmount,
-        },
-        quantity: 1,
-      };
+    const order = await createCatalogOrder(env, items);
+    const checkout = await createPaymentLinkForOrder(env, order, {
+      phase: "full",
+      amountCents: order.total_cents,
     });
 
-    const stripeRes = await fetch("https://api.stripe.com/v1/checkout/sessions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${stripeKey}`,
-        "Content-Type": "application/x-www-form-urlencoded",
+    return jsonResponse(
+      {
+        url: checkout.url,
+        sessionId: checkout.sessionId,
+        orderId: checkout.orderId,
       },
-      body: buildFormBody({
-        mode: "payment",
-        success_url: `${siteUrl}/index.html?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${siteUrl}/builds.html?checkout=cancelled`,
-        ...buildLineItemsFormData(lineItems),
-        "billing_address_collection": "required",
-        "shipping_address_collection[allowed_countries][0]": "US",
-        "shipping_address_collection[allowed_countries][1]": "CA",
-        "shipping_address_collection[allowed_countries][2]": "GB",
-        "shipping_address_collection[allowed_countries][3]": "AU",
-        "metadata[source]": "elysian_website",
-        "payment_method_types[0]": "card",
-      })
-    });
-
-    const session = await stripeRes.json();
-
-    if (!stripeRes.ok || session.error) {
-      console.error("Stripe API error:", session.error);
-      return jsonResponse({
-        error: session.error?.message || "Failed to create checkout session."
-      }, 500);
-    }
-
-    return jsonResponse({ url: session.url, sessionId: session.id });
+      200,
+      CORS_HEADERS
+    );
   } catch (error) {
-    console.error("Checkout function error:", error);
-    return jsonResponse({ error: "Internal server error." }, 500);
+    console.error("POST /api/checkout error:", error);
+    return jsonResponse({ error: error.message || "Unable to create checkout session." }, 500, CORS_HEADERS);
   }
-}
-
-function buildFormBody(params) {
-  return Object.entries(params)
-    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
-    .join("&");
-}
-
-function buildLineItemsFormData(lineItems) {
-  const result = {};
-  lineItems.forEach((item, i) => {
-    result[`line_items[${i}][price_data][currency]`] = item.price_data.currency;
-    result[`line_items[${i}][price_data][unit_amount]`] = item.price_data.unit_amount;
-    result[`line_items[${i}][price_data][product_data][name]`] = item.price_data.product_data.name;
-    result[`line_items[${i}][price_data][product_data][description]`] = item.price_data.product_data.description;
-    result[`line_items[${i}][quantity]`] = item.quantity;
-  });
-  return result;
 }

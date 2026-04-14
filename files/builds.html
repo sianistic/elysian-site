@@ -100,13 +100,13 @@
       overflow: hidden;
       background: #0d0d14;
       flex-shrink: 0;
+      contain: layout paint;
     }
 
     .gallery-track {
       display: flex;
       height: 100%;
       transition: transform 0.45s cubic-bezier(0.23, 1, 0.32, 1);
-      will-change: transform;
     }
 
     .gallery-slide {
@@ -153,7 +153,7 @@
       justify-content: center;
       opacity: 0;
       transition: opacity 0.25s ease, background 0.2s ease, transform 0.2s ease;
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(var(--surface-blur-soft));
     }
     .gallery-arrow:hover {
       background: rgba(212, 168, 67, 0.2);
@@ -203,7 +203,7 @@
       letter-spacing: 0.1em;
       padding: 0.2rem 0.5rem;
       border-radius: 100px;
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(var(--surface-blur-soft));
     }
 
     /* ── Spec Table (modal) ── */
@@ -257,7 +257,7 @@
       border-radius: 8px;
       border: 1px solid var(--border-subtle);
       background: var(--bg-glass);
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(var(--surface-blur-soft));
       color: var(--text-muted);
       cursor: pointer;
       display: flex;
@@ -341,8 +341,8 @@
       box-shadow:
         0 24px 70px rgba(0,0,0,0.22),
         inset 0 1px 0 rgba(255,255,255,0.08);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
+      backdrop-filter: blur(var(--surface-blur));
+      -webkit-backdrop-filter: blur(var(--surface-blur));
     }
     [data-theme="light"] .pc-card {
       background:
@@ -396,7 +396,7 @@
       justify-content: center;
       border-radius: 1.2rem;
       background: rgba(14, 10, 3, 0.18);
-      backdrop-filter: blur(3px);
+      backdrop-filter: blur(var(--surface-blur-soft));
       opacity: 0;
       transition: opacity 0.28s ease;
       pointer-events: none;
@@ -453,7 +453,7 @@
       font-family: var(--font-body);
       font-size: 0.7rem;
       line-height: 1;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(var(--surface-blur-soft));
       cursor: pointer;
       transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
     }
@@ -461,6 +461,15 @@
       transform: translateY(-1px);
       border-color: var(--border-gold);
       background: rgba(212,168,67,0.22);
+    }
+    html[data-effects="medium"] .pc-card:hover .gallery-slide img {
+      transform: scale(1.02);
+    }
+    html[data-effects="low"] .pc-card:hover .gallery-slide img {
+      transform: none;
+    }
+    html[data-effects="low"] .skeleton {
+      animation-duration: 2.2s;
     }
     [data-theme="light"] .pc-card-tag {
       background: rgba(255,255,255,0.7);
@@ -825,7 +834,7 @@ function buildGalleryHTML(galleryId, images, height) {
   const slides = images.length > 0
     ? images.map(src => `
         <div class="gallery-slide">
-          <img src="${src}" alt="" loading="lazy"
+          <img src="${src}" alt="" loading="lazy" decoding="async"
                onerror="this.parentElement.innerHTML='<div class=gallery-placeholder>${svgPlaceholder()}</div>'">
         </div>`).join('')
     : `<div class="gallery-slide"><div class="gallery-placeholder">${svgPlaceholder()}</div></div>`;
@@ -1133,6 +1142,26 @@ let currentPCs = [];
 let activeFilter = 'all';
 let activeQuery = '';
 let activeSort = 'featured';
+let buildRevealObserver;
+
+function shouldAnimateBuildReveals() {
+  return !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    && document.documentElement.getAttribute('data-effects') !== 'low';
+}
+
+function getBuildRevealObserver() {
+  if (!shouldAnimateBuildReveals()) return null;
+  if (!buildRevealObserver) {
+    buildRevealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('visible');
+        buildRevealObserver.unobserve(entry.target);
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -32px 0px' });
+  }
+  return buildRevealObserver;
+}
 
 function getVisibleBuilds(pcs, filter) {
   let filtered;
@@ -1193,10 +1222,14 @@ function renderBuilds(pcs, filter = 'all') {
   }
 
   filtered.forEach(pc => grid.appendChild(createPCCard(pc)));
-  const obs = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }});
-  }, { threshold: 0.1 });
-  grid.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+  const observer = getBuildRevealObserver();
+  grid.querySelectorAll('.reveal').forEach(el => {
+    if (!observer) {
+      el.classList.add('visible');
+      return;
+    }
+    observer.observe(el);
+  });
 }
 
 function renderSkeletons() {

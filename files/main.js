@@ -4,6 +4,69 @@
    ============================================================ */
 
 // ── Theme Engine ────────────────────────────────────────────
+var EffectsEngine = EffectsEngine || (() => {
+  const root = document.documentElement;
+  let resizeTimer;
+
+  function prefersReducedMotion() {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  function hasFinePointer() {
+    return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  }
+
+  function detectTier() {
+    if (prefersReducedMotion()) return 'low';
+
+    let score = 3;
+    const cores = navigator.hardwareConcurrency || 0;
+    const memory = navigator.deviceMemory || 0;
+    const viewportPixels = window.innerWidth * window.innerHeight;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const saveData = Boolean(navigator.connection && navigator.connection.saveData);
+
+    if (saveData) score -= 2;
+    if (memory && memory <= 4) score -= 1;
+    if (memory && memory <= 2) score -= 1;
+    if (cores && cores <= 4) score -= 1;
+    if (cores && cores <= 2) score -= 1;
+    if (!hasFinePointer()) score -= 1;
+    if (window.innerWidth < 900) score -= 1;
+    if (viewportPixels > 2300000 && dpr > 1.25) score -= 1;
+
+    if (score <= 0) return 'low';
+    if (score <= 2) return 'medium';
+    return 'high';
+  }
+
+  function applyTier() {
+    const tier = detectTier();
+    root.setAttribute('data-effects', tier);
+    return tier;
+  }
+
+  function syncVisibility() {
+    root.classList.toggle('effects-paused', document.visibilityState === 'hidden');
+  }
+
+  function init() {
+    applyTier();
+    syncVisibility();
+    document.addEventListener('visibilitychange', syncVisibility);
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(applyTier, 180);
+    }, { passive: true });
+  }
+
+  function getTier() {
+    return root.getAttribute('data-effects') || 'high';
+  }
+
+  return { init, applyTier, getTier };
+})();
+
 var ThemeEngine = ThemeEngine || (() => {
   const KEY = 'elysian-theme';
   const root = document.documentElement;
@@ -247,9 +310,18 @@ var Navbar = Navbar || (() => {
 
     // Scroll shrink
     if (navbar) {
-      window.addEventListener('scroll', () => {
+      let ticking = false;
+      const syncScrolled = () => {
         navbar.classList.toggle('scrolled', window.scrollY > 40);
-      });
+        ticking = false;
+      };
+
+      syncScrolled();
+      window.addEventListener('scroll', () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(syncScrolled);
+      }, { passive: true });
     }
 
     // Hamburger toggle
@@ -272,6 +344,11 @@ var Navbar = Navbar || (() => {
 // ── Scroll Reveal ────────────────────────────────────────────
 var ScrollReveal = ScrollReveal || (() => {
   function init() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || EffectsEngine.getTier() === 'low') {
+      document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+      return;
+    }
+
     const obs = new IntersectionObserver((entries) => {
       entries.forEach(e => {
         if (e.isIntersecting) {
@@ -292,9 +369,10 @@ function initPageLoader() {
   const loader = document.getElementById('page-loader');
   if (!loader) return;
   window.addEventListener('load', () => {
+    const delay = EffectsEngine.getTier() === 'high' ? 420 : 180;
     setTimeout(() => {
       loader.classList.add('hidden');
-    }, 600);
+    }, delay);
   });
 }
 
@@ -313,6 +391,7 @@ async function fetchPCData() {
 if (!window.__elysianLoaded) {
   window.__elysianLoaded = true;
   document.addEventListener('DOMContentLoaded', () => {
+    EffectsEngine.init();
     initPageLoader();
     ThemeEngine.init();
     Navbar.init();

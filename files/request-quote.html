@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Request a Quote — Elysian PCs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .quote-hero {
+      padding: 140px 0 64px;
+      text-align: center;
+      position: relative;
+    }
+    .quote-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 75% 55% at 50% 0%, var(--gold-glow), transparent 70%);
+      pointer-events: none;
+    }
+    .quote-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 2rem;
+      align-items: start;
+    }
+    .quote-card, .quote-side {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+    }
+    .quote-highlights {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+    .quote-note {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, rgba(212,168,67,0.08), rgba(255,255,255,0.01));
+      padding: 1rem;
+    }
+    .quote-note strong {
+      display: block;
+      margin-bottom: 0.35rem;
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+    }
+    .quote-status {
+      display: none;
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+    .quote-status.visible { display: block; }
+    @media (max-width: 900px) {
+      .quote-layout { grid-template-columns: 1fr; }
+      .quote-highlights { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="nav-slot"></div>
+<div class="page-wrapper">
+  <section class="quote-hero">
+    <div class="container">
+      <span class="section-eyebrow animate__animated animate__fadeInDown">Tailored Build Planning</span>
+      <h1 class="section-title animate__animated animate__fadeIn" style="font-size:clamp(2.4rem,5vw,4.8rem);margin:0.6rem 0 1rem;">
+        Request a <span class="text-gold">Custom Quote</span>
+      </h1>
+      <p class="section-subtitle animate__animated animate__fadeIn animate__delay-1s">
+        Tell us what you need. We review the request, shape the configuration internally, and send you a guided quote before any payment is due.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:1rem;">
+    <div class="container">
+      <div class="quote-layout">
+        <div class="quote-card reveal">
+          <div class="quote-highlights">
+            <div class="quote-note">
+              <strong>Human Review</strong>
+              <span class="text-secondary">An Elysian reviewer turns your requirements into an actual build proposal.</span>
+            </div>
+            <div class="quote-note">
+              <strong>No Forced Checkout</strong>
+              <span class="text-secondary">Custom work starts with a quote first. Payment links are sent only after review.</span>
+            </div>
+            <div class="quote-note">
+              <strong>Deposit Ready</strong>
+              <span class="text-secondary">Approved quotes can later support either full payment or deposit-first billing.</span>
+            </div>
+          </div>
+
+          <div id="quote-form-state">
+            <h2 style="font-family:var(--font-display);font-size:1.35rem;margin-bottom:0.35rem;">Tell us about your build</h2>
+            <p class="text-secondary mb-3" style="font-size:0.9rem;">Focus on goals, workload, budget, and anything that would make the system feel right for you.</p>
+
+            <div class="form-group">
+              <label class="form-label" for="quote-name">Full Name</label>
+              <input id="quote-name" class="form-control" type="text" placeholder="Your name">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="quote-email">Email Address</label>
+              <input id="quote-email" class="form-control" type="email" placeholder="you@example.com">
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-label" for="quote-budget">Target Budget</label>
+                <input id="quote-budget" class="form-control" type="text" placeholder="$3,000–$5,000">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="quote-timeframe">Desired Timeframe</label>
+                <input id="quote-timeframe" class="form-control" type="text" placeholder="Within 4 weeks">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="quote-use-case">Primary Use Case</label>
+              <select id="quote-use-case" class="form-control">
+                <option value="mixed">Mixed</option>
+                <option value="gaming">Gaming</option>
+                <option value="creator">Creator</option>
+                <option value="workstation">Workstation</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="quote-notes">Requirements</label>
+              <textarea id="quote-notes" class="form-control" style="min-height:180px;" placeholder="Examples: 4K editing, quiet operation, no RGB, compact case, Nvidia GPU preferred, black-and-gold aesthetic, etc."></textarea>
+            </div>
+            <button id="quote-submit" class="btn btn-primary btn-full btn-lg">Submit Quote Request</button>
+          </div>
+
+          <div class="quote-status" id="quote-success">
+            <div style="font-size:3rem;margin-bottom:1rem;">&#10003;</div>
+            <h3 style="font-family:var(--font-display);font-size:1.2rem;margin-bottom:0.5rem;">Quote request received</h3>
+            <p class="text-secondary">We’ve recorded your request and queued it for review.</p>
+            <p class="text-secondary" id="quote-success-id" style="margin-top:0.6rem;"></p>
+            <button class="btn btn-outline mt-3" onclick="window.location.reload()">Submit Another Request</button>
+          </div>
+        </div>
+
+        <aside class="quote-side reveal delay-2">
+          <h3 style="font-family:var(--font-display);font-size:1rem;letter-spacing:0.08em;margin-bottom:1rem;">What helps us quote well</h3>
+          <ul class="support-checklist">
+            <li><span class="check-dot">1</span><span>State the workload clearly: gaming, rendering, AI, software development, audio, or mixed use.</span></li>
+            <li><span class="check-dot">2</span><span>Include any constraints like silence, size, color theme, brand preference, or monitor resolution.</span></li>
+            <li><span class="check-dot">3</span><span>Give a real budget target so we can recommend the right tier instead of guessing high.</span></li>
+          </ul>
+          <div class="gold-divider" style="margin:1.5rem 0;"></div>
+          <p class="text-secondary" style="font-size:0.88rem;">Need technical help on an existing order instead? <a href="support.html">Open a support ticket</a>.</p>
+        </aside>
+      </div>
+    </div>
+  </section>
+</div>
+<div id="footer-slot"></div>
+<script src="partials.js"></script>
+<script src="main.js"></script>
+<script src="request-quote-page.js"></script>
+</body>
+</html>

@@ -92,7 +92,7 @@ function renderNav() {
       <span>Hand-built in the U.S.</span>
       <span>3-year premium warranty</span>
       <span>Concierge support 7 days a week</span>
-      <a href="support.html">Plan a custom build</a>
+      <a href="request-quote.html">Plan a custom build</a>
     </div>
   </div>
 
@@ -110,7 +110,7 @@ function renderNav() {
     </ul>
 
     <div class="nav-actions">
-      <a href="support.html" class="nav-cta">
+      <a href="request-quote.html" class="nav-cta">
         Start Build
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M7 17L17 7"></path>
@@ -149,7 +149,7 @@ function renderFooter() {
         </div>
         <div class="footer-topband-actions">
           <a href="builds.html" class="btn btn-primary">Browse Builds</a>
-          <a href="mailto:d4yohero@gmail.com" class="btn btn-outline">Email Concierge</a>
+          <a href="request-quote.html" class="btn btn-outline">Request A Quote</a>
         </div>
       </div>
       <div class="footer-grid">
@@ -175,6 +175,7 @@ function renderFooter() {
             <li><a href="index.html">Home</a></li>
             <li><a href="builds.html">All Builds</a></li>
             <li><a href="support.html">Support</a></li>
+            <li><a href="request-quote.html">Quote Request</a></li>
           </ul>
         </div>
         <div>

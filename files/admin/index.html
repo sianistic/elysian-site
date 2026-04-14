@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elysian Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    body.unlocked { overflow: auto; }
+    #admin-panel { display: flex; min-height: 100vh; }
+    #admin-sidebar {
+      position: sticky;
+      top: 0;
+      width: 248px;
+      min-height: 100vh;
+      background: rgba(10, 12, 18, 0.92);
+      border-right: 1px solid var(--border-gold);
+      backdrop-filter: blur(16px);
+      display: flex;
+      flex-direction: column;
+      z-index: 30;
+    }
+    #admin-sidebar.collapsed { width: 72px; }
+    .sidebar-brand, .sidebar-toggle { padding: 1rem; border-bottom: 1px solid var(--border-subtle); }
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+    .sidebar-brand img {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      border: 1px solid var(--border-gold);
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+    .sidebar-brand-name {
+      display: block;
+      font-family: var(--font-display);
+      color: var(--gold-pure);
+      letter-spacing: 0.08em;
+      font-size: 0.85rem;
+    }
+    .sidebar-brand-sub {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      margin-top: 0.1rem;
+    }
+    .sidebar-nav {
+      flex: 1;
+      padding: 0.75rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .sidebar-section-label {
+      padding: 0.75rem 0.75rem 0.35rem;
+      color: var(--text-muted);
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+    }
+    .sidebar-item, .sidebar-toggle button {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.72rem 0.8rem;
+      border: none;
+      border-radius: var(--radius-md);
+      background: transparent;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition), transform var(--transition);
+    }
+    .sidebar-item:hover, .sidebar-toggle button:hover {
+      background: rgba(212, 168, 67, 0.08);
+      color: var(--text-primary);
+    }
+    .sidebar-item.active {
+      background: rgba(212, 168, 67, 0.12);
+      color: var(--gold-pure);
+      border-left: 2px solid var(--gold-pure);
+    }
+    .sidebar-item svg, .sidebar-toggle svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+    .sidebar-item-label, .sidebar-brand-text, .sidebar-toggle-label {
+      transition: opacity var(--transition), width var(--transition);
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .sidebar-notif {
+      margin-left: auto;
+      background: var(--gold-pure);
+      color: var(--bg-primary);
+      border-radius: 999px;
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 0.1rem 0.42rem;
+    }
+    #admin-sidebar.collapsed .sidebar-item-label,
+    #admin-sidebar.collapsed .sidebar-brand-text,
+    #admin-sidebar.collapsed .sidebar-toggle-label,
+    #admin-sidebar.collapsed .sidebar-notif,
+    #admin-sidebar.collapsed .sidebar-section-label {
+      opacity: 0;
+      width: 0;
+      padding: 0;
+    }
+    #admin-main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .admin-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      background: rgba(12, 15, 24, 0.86);
+      backdrop-filter: blur(14px);
+    }
+    .admin-topbar-title {
+      margin: 0;
+      font-family: var(--font-display);
+      letter-spacing: 0.08em;
+      font-size: 1rem;
+      text-transform: uppercase;
+    }
+    .admin-topbar-sub {
+      margin-top: 0.2rem;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+    }
+    .admin-topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .admin-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      border: 1px solid rgba(212, 168, 67, 0.26);
+      background: rgba(212, 168, 67, 0.1);
+      color: var(--gold-soft);
+      border-radius: 999px;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    .admin-content {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .admin-view { display: none; }
+    .admin-view.active { display: block; }
+    .admin-stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1rem;
+    }
+    .stat-card, .admin-card {
+      background: rgba(18, 22, 34, 0.82);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 1.25rem;
+      box-shadow: var(--shadow-card);
+    }
+    .stat-label {
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.68rem;
+    }
+    .stat-value {
+      margin-top: 0.55rem;
+      font-family: var(--font-display);
+      font-size: 1.65rem;
+      color: var(--text-primary);
+    }
+    .stat-subvalue {
+      margin-top: 0.25rem;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+    }
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 1.25rem;
+    }
+    .admin-card-title {
+      margin: 0 0 1rem;
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .progress-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      margin-bottom: 0.9rem;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+    }
+    .progress-track {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--gold-dim), var(--gold-pure));
+      transition: width 0.35s ease;
+    }
+    .quick-links {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1rem;
+    }
+    .quick-link-card {
+      display: block;
+      background: rgba(18, 22, 34, 0.82);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.1rem;
+      text-decoration: none;
+      transition: transform var(--transition), border-color var(--transition);
+    }
+    .quick-link-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-gold);
+    }
+    .quick-link-label {
+      color: var(--text-muted);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.3rem;
+    }
+    .quick-link-title {
+      color: var(--text-primary);
+      font-family: var(--font-display);
+      font-size: 0.92rem;
+    }
+    button.quick-link-card {
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      font: inherit;
+      color: inherit;
+    }
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .summary-card {
+      background: rgba(18, 22, 34, 0.82);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1rem;
+    }
+    .summary-title {
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.66rem;
+    }
+    .summary-value {
+      margin-top: 0.45rem;
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      color: var(--text-primary);
+    }
+    .summary-note {
+      margin-top: 0.25rem;
+      color: var(--text-secondary);
+      font-size: 0.78rem;
+    }
+    .attention-list,
+    .workspace-map,
+    .ops-list,
+    .ticket-thread {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+    .attention-item,
+    .workspace-map-card,
+    .ticket-message {
+      padding: 0.95rem 1rem;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .attention-item {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .attention-item-title,
+    .workspace-map-title {
+      font-family: var(--font-display);
+      letter-spacing: 0.05em;
+      font-size: 0.88rem;
+      color: var(--text-primary);
+    }
+    .attention-item-meta,
+    .workspace-map-copy,
+    .detail-inline-item .table-meta {
+      margin-top: 0.3rem;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+    .attention-actions {
+      display: flex;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    .detail-inline-item strong,
+    .ticket-message-head {
+      display: block;
+      margin-bottom: 0.35rem;
+      font-family: var(--font-display);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+    .detail-empty {
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      padding: 0.25rem 0;
+    }
+    .ticket-message.admin {
+      border-color: rgba(212, 168, 67, 0.2);
+      background: rgba(212, 168, 67, 0.06);
+    }
+    .ticket-message-body {
+      color: var(--text-primary);
+      font-size: 0.84rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+    .ticket-review-grid,
+    .ops-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .ops-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .ops-list li {
+      padding: 0.85rem 0;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: 0.84rem;
+      line-height: 1.55;
+    }
+    .ops-list li:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .ops-list strong {
+      display: block;
+      margin-bottom: 0.25rem;
+      color: var(--text-primary);
+      font-family: var(--font-display);
+      letter-spacing: 0.05em;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+    }
+    .admin-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+    }
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 860px;
+    }
+    .admin-table th, .admin-table td {
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+      text-align: left;
+      vertical-align: top;
+      font-size: 0.85rem;
+    }
+    .admin-table th {
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-size: 0.68rem;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .table-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.22rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(212, 168, 67, 0.18);
+      background: rgba(212, 168, 67, 0.08);
+      color: var(--gold-soft);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+    .quote-summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .quote-review-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.9rem;
+    }
+    .admin-note-block {
+      padding: 1rem;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .admin-note-block strong {
+      display: block;
+      margin-bottom: 0.45rem;
+      font-family: var(--font-display);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-size: 0.76rem;
+    }
+    .table-meta {
+      margin-top: 0.25rem;
+      color: var(--text-muted);
+      font-size: 0.76rem;
+    }
+    .save-banner {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      background: rgba(212, 168, 67, 0.12);
+      border: 1px solid rgba(212, 168, 67, 0.24);
+      border-radius: var(--radius-lg);
+      padding: 0.95rem 1rem;
+    }
+    .save-banner.visible { display: flex; }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.58);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      z-index: 60;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      width: min(100%, 640px);
+      background: rgba(18, 22, 34, 0.96);
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-deep);
+    }
+    .modal-header, .modal-footer {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+    .modal-footer {
+      border-bottom: none;
+      border-top: 1px solid var(--border-subtle);
+      justify-content: flex-end;
+    }
+    .modal-body {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    .order-detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .detail-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    .detail-table th,
+    .detail-table td {
+      text-align: left;
+      padding: 0.72rem 0.65rem;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: top;
+    }
+    .detail-table th {
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.68rem;
+    }
+    .detail-inline-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.85rem;
+    }
+    .detail-inline-item {
+      padding: 0.85rem 0.9rem;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .detail-inline-item strong {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .detail-empty {
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      padding: 0.85rem 0;
+    }
+    @media (max-width: 1100px) {
+      .admin-stats, .quick-links, .admin-grid, .summary-strip, .ops-grid { grid-template-columns: 1fr 1fr; }
+      .quote-summary-grid, .quote-review-grid, .order-detail-grid, .detail-inline-list, .ticket-review-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 860px) {
+      #admin-panel { flex-direction: column; }
+      #admin-sidebar {
+        position: static;
+        width: 100%;
+        min-height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border-gold);
+      }
+      #admin-sidebar.collapsed { width: 100%; }
+      .admin-stats, .quick-links, .admin-grid, .summary-strip, .ops-grid { grid-template-columns: 1fr; }
+      .admin-topbar { padding: 1rem; }
+      .admin-content { padding: 1rem; }
+    }
+  </style>
+</head>
+<body class="unlocked">
+  <div id="aurora-bg" aria-hidden="true"><div id="aurora-layer"></div></div>
+
+  <div id="admin-panel" class="visible">
+    <nav id="admin-sidebar" aria-label="Admin navigation">
+      <div class="sidebar-brand">
+        <img src="../assets/logo.jpg" alt="Elysian PCs logo" onerror="this.style.display='none'">
+        <div class="sidebar-brand-text">
+          <span class="sidebar-brand-name">ELYSIAN PCS</span>
+          <span class="sidebar-brand-sub">Protected Admin Route</span>
+        </div>
+      </div>
+
+      <div class="sidebar-nav">
+        <div class="sidebar-section-label">Overview</div>
+        <button class="sidebar-item active" data-view="dashboard" data-label="Dashboard" onclick="switchView('dashboard', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8" rx="1"></rect><rect x="13" y="3" width="8" height="5" rx="1"></rect><rect x="13" y="10" width="8" height="11" rx="1"></rect><rect x="3" y="13" width="8" height="8" rx="1"></rect></svg>
+          <span class="sidebar-item-label">Dashboard</span>
+        </button>
+
+        <div class="sidebar-section-label">Commerce</div>
+        <button class="sidebar-item" data-view="quotes" data-label="Quotes" onclick="switchView('quotes', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          <span class="sidebar-item-label">Quotes</span>
+          <span class="sidebar-notif" id="notif-quotes" style="display:none;">0</span>
+        </button>
+        <button class="sidebar-item" data-view="orders" data-label="Orders" onclick="switchView('orders', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M7 8h10"></path><path d="M7 12h10"></path><path d="M7 16h6"></path></svg>
+          <span class="sidebar-item-label">Orders</span>
+          <span class="sidebar-notif" id="notif-orders" style="display:none;">0</span>
+        </button>
+
+        <div class="sidebar-section-label">Catalog</div>
+        <button class="sidebar-item" data-view="catalog" data-label="Catalog" onclick="switchView('catalog', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l9-4 9 4-9 4-9-4z"></path><path d="M3 17l9 4 9-4"></path><path d="M3 12l9 4 9-4"></path></svg>
+          <span class="sidebar-item-label">Catalog</span>
+          <span class="sidebar-notif" id="notif-unsaved" style="display:none;">!</span>
+        </button>
+        <button class="sidebar-item" data-view="analytics" data-label="Analytics" onclick="switchView('analytics', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          <span class="sidebar-item-label">Insights</span>
+        </button>
+
+        <div class="sidebar-section-label">Support</div>
+        <button class="sidebar-item" data-view="support" data-label="Support" onclick="switchView('support', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M8 9h8"></path><path d="M8 13h5"></path></svg>
+          <span class="sidebar-item-label">Tickets</span>
+          <span class="sidebar-notif" id="notif-tickets" style="display:none;">0</span>
+        </button>
+
+        <div class="sidebar-section-label">Operations</div>
+        <button class="sidebar-item" data-view="operations" data-label="Operations" onclick="switchView('operations', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06A2 2 0 1 1 4.21 16.96l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 8a1.65 1.65 0 0 0-.33-1.82l-.06-.06A2 2 0 1 1 7.04 3.3l.06.06A1.65 1.65 0 0 0 8.92 3h.08A1.65 1.65 0 0 0 10 1.49V1a2 2 0 1 1 4 0v.09A1.65 1.65 0 0 0 15 2.6a1.65 1.65 0 0 0 1.82-.33l.06-.06A2 2 0 1 1 19.79 5.04l-.06.06A1.65 1.65 0 0 0 19.4 7v.08A1.65 1.65 0 0 0 20.91 8H21a2 2 0 1 1 0 4h-.09A1.65 1.65 0 0 0 19.4 13z"></path></svg>
+          <span class="sidebar-item-label">Site & Ops</span>
+        </button>
+
+        <div class="sidebar-section-label">Public Pages</div>
+        <a href="../index.html" target="_blank" class="sidebar-item" data-label="Home">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5L12 3l9 7.5"></path><path d="M5 9.5V21h14V9.5"></path></svg>
+          <span class="sidebar-item-label">Home</span>
+        </a>
+        <a href="../builds.html" target="_blank" class="sidebar-item" data-label="Builds">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+          <span class="sidebar-item-label">Builds</span>
+        </a>
+        <a href="../request-quote.html" target="_blank" class="sidebar-item" data-label="Quote Request">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path></svg>
+          <span class="sidebar-item-label">Quote Request</span>
+        </a>
+        <a href="../support.html" target="_blank" class="sidebar-item" data-label="Support">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 11.37 19 19.5 19.5 0 0 1 5 12.69 19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.07 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+          <span class="sidebar-item-label">Support</span>
+        </a>
+      </div>
+
+      <div class="sidebar-toggle">
+        <button type="button" onclick="toggleSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <span class="sidebar-toggle-label">Collapse Sidebar</span>
+        </button>
+      </div>
+    </nav>
+
+    <main id="admin-main">
+      <header class="admin-topbar">
+        <div>
+          <h1 class="admin-topbar-title" id="topbar-title"><span class="text-gold">Dashboard</span></h1>
+          <div class="admin-topbar-sub" id="topbar-subtitle">Operational overview for catalog, commerce, support, and public entry points.</div>
+        </div>
+        <div class="admin-topbar-actions">
+          <span class="admin-chip" id="topbar-context-chip">Overview</span>
+          <button class="btn btn-ghost btn-sm" type="button" onclick="refreshAdminData()">Refresh</button>
+          <button class="btn btn-outline btn-sm theme-toggle" type="button">Theme</button>
+          <button class="btn btn-ghost btn-sm" type="button" onclick="signOut()">Sign Out</button>
+        </div>
+      </header>
+
+      <div class="admin-content">
+        <div class="save-banner" id="save-banner">
+          <div>
+            <div class="text-gold" style="font-family:var(--font-display);letter-spacing:0.06em;text-transform:uppercase;font-size:0.82rem;">Catalog changes pending</div>
+            <div class="text-secondary" style="font-size:0.82rem;">You have unsaved product updates ready to publish.</div>
+          </div>
+          <button class="btn btn-primary btn-sm" type="button" onclick="saveAllChanges()">Save Catalog</button>
+        </div>
+
+        <section class="admin-view active" id="view-dashboard">
+          <div class="admin-stats">
+            <div class="stat-card">
+              <div class="stat-label">Catalog Builds</div>
+              <div class="stat-value" id="stat-builds">0</div>
+              <div class="stat-subvalue" id="stat-builds-sub">Public builds currently listed</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Quotes Needing Review</div>
+              <div class="stat-value" id="stat-quotes-open">0</div>
+              <div class="stat-subvalue" id="stat-quotes-open-sub">New or in-review quote requests</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Payment Attention</div>
+              <div class="stat-value" id="stat-orders-attention">0</div>
+              <div class="stat-subvalue" id="stat-orders-attention-sub">Orders waiting on payment action</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Active Tickets</div>
+              <div class="stat-value" id="stat-tickets-open">0</div>
+              <div class="stat-subvalue" id="stat-tickets-open-sub">Support conversations needing follow-up</div>
+            </div>
+          </div>
+
+          <div class="admin-grid">
+            <div class="admin-card">
+              <h2 class="admin-card-title">Needs Attention</h2>
+              <div id="dashboard-priority-list" class="attention-list">
+                <div class="detail-empty">Loading current admin workload...</div>
+              </div>
+            </div>
+            <div class="admin-card">
+              <h2 class="admin-card-title">Workspace Guide</h2>
+              <div id="dashboard-workspace-map" class="workspace-map">
+                <div class="detail-empty">Loading workspace overview...</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="quick-links">
+            <button class="quick-link-card" type="button" onclick="switchView('quotes')">
+              <div class="quick-link-label">Commerce</div>
+              <div class="quick-link-title">Review Quotes</div>
+            </button>
+            <button class="quick-link-card" type="button" onclick="switchView('orders')">
+              <div class="quick-link-label">Commerce</div>
+              <div class="quick-link-title">Investigate Orders</div>
+            </button>
+            <button class="quick-link-card" type="button" onclick="switchView('support')">
+              <div class="quick-link-label">Support</div>
+              <div class="quick-link-title">Manage Tickets</div>
+            </button>
+            <button class="quick-link-card" type="button" onclick="switchView('catalog')">
+              <div class="quick-link-label">Catalog</div>
+              <div class="quick-link-title">Edit Builds</div>
+            </button>
+          </div>
+        </section>
+
+        <section class="admin-view" id="view-catalog">
+          <div class="admin-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+              <div>
+                <h2 class="admin-card-title" style="margin-bottom:0.3rem;">Catalog Editor</h2>
+                <div class="text-secondary" style="font-size:0.82rem;">Manage the public builds catalog before we move the rest of the commerce flow onto D1-backed product data.</div>
+              </div>
+              <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+                <button class="btn btn-outline btn-sm" type="button" onclick="addNewPC()">Add Build</button>
+                <button class="btn btn-primary btn-sm" type="button" onclick="saveAllChanges()">Save Catalog</button>
+              </div>
+            </div>
+
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Build</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Badge</th>
+                    <th>Tags</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="pc-editor-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-view" id="view-quotes">
+          <div class="admin-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+              <div>
+                <h2 class="admin-card-title" style="margin-bottom:0.3rem;">Quote Workflow</h2>
+                <div class="text-secondary" style="font-size:0.82rem;">Review customer requirements, refine the internal configuration, approve the quote, and manually generate the Stripe payment link when you are ready.</div>
+              </div>
+            </div>
+
+            <div class="summary-strip">
+              <div class="summary-card">
+                <div class="summary-title">New Requests</div>
+                <div class="summary-value" id="quotes-summary-requested">0</div>
+                <div class="summary-note">Awaiting first review</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-title">In Review</div>
+                <div class="summary-value" id="quotes-summary-review">0</div>
+                <div class="summary-note">Internal configuration still in progress</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-title">Payment Ready</div>
+                <div class="summary-value" id="quotes-summary-payment">0</div>
+                <div class="summary-note">Approved quotes with an active payment link</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-title">Paid</div>
+                <div class="summary-value" id="quotes-summary-paid">0</div>
+                <div class="summary-note">Quote-linked orders fully paid</div>
+              </div>
+            </div>
+
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Customer</th>
+                    <th>Quote</th>
+                    <th>Review Status</th>
+                    <th>Pricing</th>
+                    <th>Linked Order</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="quotes-table-body">
+                  <tr><td colspan="6" class="text-secondary">Loading quote requests...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-view" id="view-orders">
+          <div class="admin-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+              <div>
+                <h2 class="admin-card-title" style="margin-bottom:0.3rem;">Order & Payment Tracking</h2>
+                <div class="text-secondary" style="font-size:0.82rem;">Webhook-confirmed state is the source of truth here. Each order keeps one durable record with tracked checkout sessions for every payment attempt or phase.</div>
+              </div>
+            </div>
+
+            <div class="summary-strip">
+              <div class="summary-card">
+                <div class="summary-title">Pending Payment</div>
+                <div class="summary-value" id="orders-summary-pending">0</div>
+                <div class="summary-note">No confirmed payment yet</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-title">Awaiting Balance</div>
+                <div class="summary-value" id="orders-summary-balance">0</div>
+                <div class="summary-note">Deposit recorded, balance still due</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-title">Failures / Expired</div>
+                <div class="summary-value" id="orders-summary-risk">0</div>
+                <div class="summary-note">Retry-relevant payment states</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-title">Fully Paid</div>
+                <div class="summary-value" id="orders-summary-paid">0</div>
+                <div class="summary-note">Ready for the next operational step</div>
+              </div>
+            </div>
+
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Order</th>
+                    <th>Customer</th>
+                    <th>Order Status</th>
+                    <th>Payment State</th>
+                    <th>Latest Session</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="orders-table-body">
+                  <tr><td colspan="6" class="text-secondary">Loading orders...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-view" id="view-support">
+          <div class="admin-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+              <div>
+                <h2 class="admin-card-title" style="margin-bottom:0.3rem;">Support Ticket Queue</h2>
+                <div class="text-secondary" style="font-size:0.82rem;">Move tickets cleanly from new intake through triage, customer follow-up, and resolution without mixing internal notes with customer-visible replies.</div>
+              </div>
+            </div>
+
+            <div class="summary-strip">
+              <div class="summary-card">
+                <div class="summary-title">New</div>
+                <div class="summary-value" id="tickets-summary-new">0</div>
+                <div class="summary-note">Fresh requests waiting for first triage</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-title">Triaged</div>
+                <div class="summary-value" id="tickets-summary-triaged">0</div>
+                <div class="summary-note">Owned and actively being worked</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-title">Waiting on Customer</div>
+                <div class="summary-value" id="tickets-summary-waiting">0</div>
+                <div class="summary-note">Admin replied and customer action is pending</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-title">High Priority</div>
+                <div class="summary-value" id="tickets-summary-high">0</div>
+                <div class="summary-note">Needs timely follow-up</div>
+              </div>
+            </div>
+
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Requester</th>
+                    <th>Ticket</th>
+                    <th>Queue State</th>
+                    <th>Owner</th>
+                    <th>Linked Work</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="tickets-table-body">
+                  <tr><td colspan="6" class="text-secondary">Loading support tickets...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-view" id="view-analytics">
+          <div class="admin-grid">
+            <div class="admin-card">
+              <h2 class="admin-card-title">Category Distribution</h2>
+              <div id="analytics-categories" style="display:flex;flex-direction:column;gap:0.85rem;"></div>
+            </div>
+            <div class="admin-card">
+              <h2 class="admin-card-title">Price Tiers</h2>
+              <div id="analytics-prices" style="display:flex;flex-direction:column;gap:0.85rem;"></div>
+            </div>
+          </div>
+          <div class="admin-card">
+            <h2 class="admin-card-title">Build Price Comparison</h2>
+            <div id="analytics-bars" style="display:flex;flex-direction:column;gap:0.85rem;"></div>
+          </div>
+        </section>
+
+        <section class="admin-view" id="view-operations">
+          <div class="ops-grid">
+            <div class="admin-card">
+              <h2 class="admin-card-title">Admin Scope</h2>
+              <ul class="ops-list">
+                <li><strong>Catalog</strong>Public build data, pricing, badges, and published site inventory live here.</li>
+                <li><strong>Commerce</strong>Quotes become orders, payment links stay manual, and Stripe webhooks remain the source of truth for paid state.</li>
+                <li><strong>Support</strong>Tickets track inbound customer issues, linked order context, and internal notes for follow-up.</li>
+                <li><strong>Operations</strong>Use this workspace to keep route, intake, and environment context visible without mixing it into day-to-day queue work.</li>
+              </ul>
+            </div>
+            <div class="admin-card">
+              <h2 class="admin-card-title">Public Entry Points</h2>
+              <div class="quick-links">
+                <a href="../index.html" target="_blank" class="quick-link-card">
+                  <div class="quick-link-label">Public Site</div>
+                  <div class="quick-link-title">Open Home</div>
+                </a>
+                <a href="../builds.html" target="_blank" class="quick-link-card">
+                  <div class="quick-link-label">Public Site</div>
+                  <div class="quick-link-title">Open Builds</div>
+                </a>
+                <a href="../request-quote.html" target="_blank" class="quick-link-card">
+                  <div class="quick-link-label">Lead Intake</div>
+                  <div class="quick-link-title">Open Quote Request</div>
+                </a>
+                <a href="../support.html" target="_blank" class="quick-link-card">
+                  <div class="quick-link-label">Support Intake</div>
+                  <div class="quick-link-title">Open Support Page</div>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-grid">
+            <div class="admin-card">
+              <h2 class="admin-card-title">Operational Notes</h2>
+              <ul class="ops-list">
+                <li><strong>Current Admin Route</strong><span id="ops-current-route">/admin/</span></li>
+                <li><strong>Catalog Publish Model</strong>Catalog edits stay staged locally in the editor until you save them back through the protected API.</li>
+                <li><strong>Quote to Order Flow</strong>Approve and refine the quote first, then generate the payment link manually from admin when you are ready.</li>
+                <li><strong>Payment Truth Source</strong>Use the Orders workspace for confirmed payment state; return URLs are not the final authority.</li>
+              </ul>
+            </div>
+            <div class="admin-card">
+              <h2 class="admin-card-title">Workspace Boundaries</h2>
+              <div id="operations-boundary-map" class="workspace-map">
+                <div class="workspace-map-card">
+                  <div class="workspace-map-title">Dashboard</div>
+                  <div class="workspace-map-copy">Operational triage only. Use it to decide where to go next, not to do the full job.</div>
+                </div>
+                <div class="workspace-map-card">
+                  <div class="workspace-map-title">Catalog vs Commerce</div>
+                  <div class="workspace-map-copy">Catalog controls public products. Commerce controls quote review, payment readiness, orders, and Stripe state.</div>
+                </div>
+                <div class="workspace-map-card">
+                  <div class="workspace-map-title">Support vs Orders</div>
+                  <div class="workspace-map-copy">Tickets hold the conversation. Orders hold the payment lifecycle. Linked order IDs bridge the two when needed.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="spec-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title" id="spec-modal-title">Edit Specs</span>
+        <button class="btn btn-ghost btn-sm" type="button" onclick="closeSpecModal()">Close</button>
+      </div>
+      <div class="modal-body">
+        <div id="spec-editor-fields"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-sm" type="button" onclick="closeSpecModal()">Cancel</button>
+        <button class="btn btn-primary btn-sm" type="button" onclick="saveSpecsFromModal()">Save Specs</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="quote-modal">
+    <div class="modal" style="width:min(100%,900px);">
+      <div class="modal-header">
+        <div>
+          <span class="modal-title" id="quote-modal-title">Quote Review</span>
+          <div class="table-meta" id="quote-modal-subtitle">Review configuration, pricing, and payment mode before approval.</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" type="button" onclick="closeQuoteModal()">Close</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="quote-modal-id">
+
+        <div class="quote-summary-grid">
+          <div class="admin-note-block">
+            <strong>Customer Request</strong>
+            <div id="quote-request-summary" class="text-secondary" style="white-space:pre-wrap;font-size:0.86rem;"></div>
+          </div>
+          <div class="admin-note-block">
+            <strong>Linked Order</strong>
+            <div id="quote-order-summary" class="text-secondary" style="white-space:pre-wrap;font-size:0.86rem;"></div>
+          </div>
+        </div>
+
+        <div class="quote-review-grid">
+          <div class="form-group">
+            <label class="form-label" for="quote-config-cpu">CPU</label>
+            <input id="quote-config-cpu" class="form-control" type="text" placeholder="Ryzen 9 / Core i9 / etc.">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="quote-config-gpu">GPU</label>
+            <input id="quote-config-gpu" class="form-control" type="text" placeholder="RTX / Radeon / etc.">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="quote-config-ram">RAM</label>
+            <input id="quote-config-ram" class="form-control" type="text" placeholder="64GB DDR5-6000">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="quote-config-storage">Storage</label>
+            <input id="quote-config-storage" class="form-control" type="text" placeholder="2TB NVMe Gen4 SSD">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="quote-config-motherboard">Motherboard</label>
+            <input id="quote-config-motherboard" class="form-control" type="text" placeholder="X670E / Z790 / etc.">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="quote-config-psu">PSU</label>
+            <input id="quote-config-psu" class="form-control" type="text" placeholder="1000W Gold">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="quote-config-case">Case</label>
+            <input id="quote-config-case" class="form-control" type="text" placeholder="Lian Li / Fractal / etc.">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="quote-config-cooling">Cooling</label>
+            <input id="quote-config-cooling" class="form-control" type="text" placeholder="360mm AIO / custom loop">
+          </div>
+        </div>
+
+        <div class="quote-review-grid">
+          <div class="form-group">
+            <label class="form-label" for="quote-payment-mode">Payment Mode</label>
+            <select id="quote-payment-mode" class="form-control" onchange="toggleQuoteDepositField()">
+              <option value="full_payment">Full Payment</option>
+              <option value="deposit_first">Deposit First</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="quote-subtotal">Quoted Subtotal (USD)</label>
+            <input id="quote-subtotal" class="form-control" type="number" min="0" step="0.01" placeholder="5499.00">
+          </div>
+          <div class="form-group" id="quote-deposit-group" style="display:none;">
+            <label class="form-label" for="quote-deposit">Deposit Amount (USD)</label>
+            <input id="quote-deposit" class="form-control" type="number" min="0" step="0.01" placeholder="1500.00">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="quote-compatibility-notes">Compatibility Notes</label>
+          <textarea id="quote-compatibility-notes" class="form-control" style="min-height:110px;" placeholder="Part compatibility, power headroom, BIOS concerns, airflow constraints, clearance notes, etc."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="quote-build-notes">Build Notes</label>
+          <textarea id="quote-build-notes" class="form-control" style="min-height:110px;" placeholder="Internal configuration decisions, upgrade tradeoffs, sourcing notes, or fulfillment considerations."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="quote-admin-notes">Admin Notes</label>
+          <textarea id="quote-admin-notes" class="form-control" style="min-height:110px;" placeholder="Internal notes about approval, customer communication, and pricing rationale."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-sm" type="button" onclick="closeQuoteModal()">Cancel</button>
+        <button class="btn btn-ghost btn-sm" type="button" onclick="saveQuoteReview()">Save Review</button>
+        <button class="btn btn-primary btn-sm" type="button" onclick="approveQuoteFromModal()">Approve Quote</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="order-detail-modal">
+    <div class="modal" style="width:min(100%,1080px);">
+      <div class="modal-header">
+        <div>
+          <span class="modal-title" id="order-detail-title">Order Detail</span>
+          <div class="table-meta" id="order-detail-subtitle">Trace payment attempts, webhook confirmations, and order state changes here.</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" type="button" onclick="closeOrderDetailModal()">Close</button>
+      </div>
+      <div class="modal-body">
+        <div class="order-detail-grid">
+          <div class="admin-note-block">
+            <strong>Order Summary</strong>
+            <div id="order-detail-summary" class="detail-inline-list"></div>
+          </div>
+          <div class="admin-note-block">
+            <strong>Status Guide</strong>
+            <div id="order-detail-status-guide" class="text-secondary" style="white-space:pre-wrap;font-size:0.84rem;"></div>
+          </div>
+        </div>
+
+        <div class="admin-note-block">
+          <strong>Payment Attempts</strong>
+          <div id="order-detail-payments-wrap"></div>
+        </div>
+
+        <div class="order-detail-grid">
+          <div class="admin-note-block">
+            <strong>Order Timeline</strong>
+            <div id="order-detail-events-wrap"></div>
+          </div>
+          <div class="admin-note-block">
+            <strong>Webhook Deliveries</strong>
+            <div id="order-detail-webhooks-wrap"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-sm" type="button" onclick="closeOrderDetailModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="ticket-detail-modal">
+    <div class="modal" style="width:min(100%,980px);">
+      <div class="modal-header">
+        <div>
+          <span class="modal-title" id="ticket-detail-title">Ticket Detail</span>
+          <div class="table-meta" id="ticket-detail-subtitle">Review the thread, manage ownership, and separate internal notes from customer-visible updates.</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" type="button" onclick="closeTicketModal()">Close</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="ticket-modal-id">
+
+        <div class="ticket-review-grid">
+          <div class="admin-note-block">
+            <strong>Ticket Summary</strong>
+            <div id="ticket-detail-summary" class="detail-inline-list"></div>
+          </div>
+          <div class="admin-note-block">
+            <strong>Admin Controls</strong>
+            <div class="ticket-review-grid">
+              <div class="form-group">
+                <label class="form-label" for="ticket-status">Status</label>
+                <select id="ticket-status" class="form-control">
+                  <option value="new">New</option>
+                  <option value="triaged">Triaged</option>
+                  <option value="waiting_on_customer">Waiting on Customer</option>
+                  <option value="resolved">Resolved</option>
+                  <option value="closed">Closed</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="ticket-priority">Priority</label>
+                <select id="ticket-priority" class="form-control">
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
+              <div class="form-group" style="grid-column:1 / -1;">
+                <label class="form-label" for="ticket-assigned-admin">Assigned Admin</label>
+                <input id="ticket-assigned-admin" class="form-control" type="text" placeholder="Primary Admin">
+              </div>
+              <div class="form-group" style="grid-column:1 / -1;">
+                <label class="form-label" for="ticket-internal-note">Add Internal Note</label>
+                <textarea id="ticket-internal-note" class="form-control" style="min-height:120px;" placeholder="Document next steps, customer communication context, or troubleshooting notes."></textarea>
+              </div>
+              <div class="form-group" style="grid-column:1 / -1;">
+                <label class="form-label" for="ticket-customer-reply">Customer-Facing Reply</label>
+                <textarea id="ticket-customer-reply" class="form-control" style="min-height:120px;" placeholder="Write the next customer-visible update. This reply is stored in the thread and passed to the notification layer."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-note-block">
+          <strong>Conversation Timeline</strong>
+          <div id="ticket-detail-thread" class="ticket-thread">
+            <div class="detail-empty">Loading ticket messages...</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-sm" type="button" onclick="closeTicketModal()">Cancel</button>
+        <button class="btn btn-primary btn-sm" type="button" onclick="saveTicketUpdate()">Save Ticket</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../main.js"></script>
+  <script src="../admin-page.js"></script>
+  <script src="../admin-commerce.js"></script>
+  <script src="../admin-support.js"></script>
+</body>
+</html>

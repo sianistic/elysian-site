@@ -246,7 +246,7 @@
         Elysian <span class="text-gold">Support</span>
       </h1>
       <p class="section-subtitle animate__animated animate__fadeIn animate__delay-1s">
-        White-glove technical support for every Elysian owner. Submit a ticket and our engineers will respond within 2 hours.
+        White-glove technical support for every Elysian owner. Submit a ticket, keep the reference ID, and our team will pick up the request from a real internal support queue.
       </p>
     </div>
   </div>
@@ -279,13 +279,15 @@
           </div>
 
           <h2 style="font-family:var(--font-display);font-size:1.3rem;margin-bottom:0.3rem;">Submit a Support Ticket</h2>
-          <p class="text-secondary mb-3" style="font-size:0.87rem;">All fields are required. Our team responds within 2 hours Monday through Sunday.</p>
+          <p class="text-secondary mb-3" style="font-size:0.87rem;">All fields are required except the order or quote reference. Add that reference when you have it so support can tie the ticket back to the right work.</p>
 
           <!-- Success State -->
           <div class="ticket-status" id="ticket-success">
             <div class="ticket-status-icon">&#10003;</div>
             <h3>Ticket Submitted!</h3>
-            <p class="text-secondary" style="font-size:0.87rem;">Your ticket has been received. An Elysian engineer will contact you at your provided email within 2 hours.</p>
+            <p class="text-secondary" style="font-size:0.87rem;">Your ticket has been received and added to the support queue. Keep this ticket ID for follow-up:</p>
+            <div class="text-gold" id="ticket-success-id" style="font-family:var(--font-display);font-size:1.1rem;letter-spacing:0.08em;margin-top:0.6rem;">TKT-...</div>
+            <p class="text-secondary" id="ticket-success-meta" style="font-size:0.82rem;margin-top:0.8rem;">We will use your submitted email address for follow-up updates.</p>
             <button class="btn btn-outline mt-3" onclick="resetTicketForm()">Submit Another Ticket</button>
           </div>
 
@@ -310,8 +312,8 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="ticket-order">Order ID (Optional)</label>
-              <input type="text" id="ticket-order" class="form-control" placeholder="ELYS-XXXXX">
+              <label class="form-label" for="ticket-order">Order or Quote Reference (Optional)</label>
+              <input type="text" id="ticket-order" class="form-control" placeholder="Paste your order ID, quote ID, or checkout reference if you have one">
             </div>
 
             <div class="form-group">
@@ -323,7 +325,6 @@
                 <option value="Shipping & Delivery">Shipping & Delivery</option>
                 <option value="Warranty Claim">Warranty Claim</option>
                 <option value="Returns & Refunds">Returns & Refunds</option>
-                <option value="Custom Build Inquiry">Custom Build Inquiry</option>
                 <option value="Other">Other</option>
               </select>
             </div>
@@ -380,9 +381,11 @@
             </h3>
             <ul class="support-checklist">
               <li><span class="check-dot">1</span><span>Include the exact issue, error message, and what changed just before the problem started.</span></li>
-              <li><span class="check-dot">2</span><span>Add your order ID if you have it so we can route the request faster.</span></li>
+              <li><span class="check-dot">2</span><span>Add your order or quote reference if you have one so we can link the ticket to the right work faster.</span></li>
               <li><span class="check-dot">3</span><span>Choose the right priority level so urgent hardware failures are handled first.</span></li>
             </ul>
+            <div class="gold-divider" style="margin:1.25rem 0;"></div>
+            <p class="text-secondary" style="font-size:0.86rem;">Need a new custom build rather than support on an existing order? <a href="request-quote.html">Request a custom quote</a>.</p>
           </div>
 
           <div class="support-info-card reveal delay-2">
@@ -458,7 +461,7 @@
                 Can I upgrade later?
                 <svg class="faq-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
               </div>
-              <div class="faq-a">Absolutely. Elysian owners receive lifetime upgrade consultations and discounted upgrade services. Submit a custom build inquiry through this form.</div>
+              <div class="faq-a">Absolutely. Elysian owners receive lifetime upgrade consultations and discounted upgrade services. If you need a new system proposal, use the dedicated quote request page.</div>
             </div>
 
             <div class="faq-item">
@@ -480,7 +483,6 @@
 <div id="footer-slot"></div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
-<script data-cfasync="false" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script data-cfasync="false" src="partials.js"></script>
 <script data-cfasync="false" src="main.js"></script>
 <script data-cfasync="false" src="support-page.js"></script>

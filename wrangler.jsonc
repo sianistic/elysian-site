@@ -6,14 +6,35 @@
   "vars": {
     "SITE_URL": "http://localhost:8788"
   },
+  // Required secrets for the current backend:
+  // npx wrangler pages secret put ADMIN_PASSWORD
+  // npx wrangler pages secret put STRIPE_SECRET_KEY
+  // npx wrangler pages secret put STRIPE_WEBHOOK_SECRET
+  // Bind D1 once created:
+  // npx wrangler d1 create elysian-db
+  // Then copy the database_id values below.
   "env": {
     "preview": {
+      // "d1_databases": [
+      //   {
+      //     "binding": "DB",
+      //     "database_name": "elysian-db-preview",
+      //     "database_id": "<preview-database-id>"
+      //   }
+      // ],
       "kv_namespaces": [],
       "vars": {
         "SITE_URL": "https://elysian-site.pages.dev"
       }
     },
     "production": {
+      // "d1_databases": [
+      //   {
+      //     "binding": "DB",
+      //     "database_name": "elysian-db",
+      //     "database_id": "<production-database-id>"
+      //   }
+      // ],
       "kv_namespaces": [
         {
           "binding": "ELYSIAN_DATA",

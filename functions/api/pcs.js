@@ -9,6 +9,16 @@
  * Wrangler config: ./wrangler.jsonc
  */
 
+import { jsonResponse } from "../_lib/http.js";
+import { normalizeBuild, normalizeTags } from "../_lib/catalog.js";
+import {
+  loadBuildsFromD1,
+  loadBuildsFromKv,
+  saveBuildsToD1,
+  saveBuildsToKv,
+} from "../_lib/storage.js";
+import { requireAdminSession } from "../_lib/session.js";
+
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -128,104 +138,122 @@ const DEFAULT_PCS = [
   }
 ];
 
-function normalizeTags(tags) {
-  const source = Array.isArray(tags) ? tags : String(tags || "").split(",");
-  return source
-    .map(tag => String(tag || "").trim().toLowerCase())
-    .filter(Boolean)
-    .filter((tag, idx, arr) => arr.indexOf(tag) === idx)
-    .slice(0, 8);
-}
-
-function jsonResponse(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      ...CORS_HEADERS,
-      "Content-Type": "application/json",
-      "Cache-Control": "no-store",
-    }
-  });
-}
-
 export async function onRequestOptions() {
   return new Response(null, { status: 204, headers: CORS_HEADERS });
 }
 
 export async function onRequestGet({ env }) {
   try {
-    if (!env.ELYSIAN_DATA) {
-      console.warn("ELYSIAN_DATA KV binding not found - returning defaults");
-      return jsonResponse({ pcs: DEFAULT_PCS, source: "defaults" });
+    const d1Builds = await loadBuildsFromD1(env);
+    if (Array.isArray(d1Builds) && d1Builds.length) {
+      return jsonResponse(
+        { pcs: d1Builds, source: "d1" },
+        200,
+        { ...CORS_HEADERS, "Cache-Control": "no-store" }
+      );
     }
 
-    const stored = await env.ELYSIAN_DATA.get(KV_KEY, { type: "json" });
-
-    if (!stored || !stored.pcs || !Array.isArray(stored.pcs)) {
-      await env.ELYSIAN_DATA.put(KV_KEY, JSON.stringify({ pcs: DEFAULT_PCS }));
-      return jsonResponse({ pcs: DEFAULT_PCS, source: "seeded" });
+    const kvBuilds = await loadBuildsFromKv(env, KV_KEY);
+    if (Array.isArray(kvBuilds) && kvBuilds.length) {
+      if (env.DB) {
+        await saveBuildsToD1(env, kvBuilds);
+      }
+      return jsonResponse(
+        { pcs: kvBuilds, source: "kv" },
+        200,
+        { ...CORS_HEADERS, "Cache-Control": "no-store" }
+      );
     }
 
-    return jsonResponse({ pcs: stored.pcs, source: "kv", updatedAt: stored.updatedAt });
+    if (env.DB) {
+      await saveBuildsToD1(env, DEFAULT_PCS);
+      return jsonResponse(
+        { pcs: DEFAULT_PCS, source: "seeded_d1" },
+        200,
+        { ...CORS_HEADERS, "Cache-Control": "no-store" }
+      );
+    }
+
+    if (env.ELYSIAN_DATA) {
+      await saveBuildsToKv(env, KV_KEY, DEFAULT_PCS);
+      return jsonResponse(
+        { pcs: DEFAULT_PCS, source: "seeded_kv" },
+        200,
+        { ...CORS_HEADERS, "Cache-Control": "no-store" }
+      );
+    }
+
+    console.warn("No D1 or KV binding found - returning defaults");
+    return jsonResponse(
+      { pcs: DEFAULT_PCS, source: "defaults" },
+      200,
+      { ...CORS_HEADERS, "Cache-Control": "no-store" }
+    );
   } catch (error) {
     console.error("GET /api/pcs error:", error);
-    return jsonResponse({ pcs: DEFAULT_PCS, source: "error_fallback", error: error.message }, 200);
+    return jsonResponse(
+      { pcs: DEFAULT_PCS, source: "error_fallback", error: error.message },
+      200,
+      { ...CORS_HEADERS, "Cache-Control": "no-store" }
+    );
   }
 }
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost(context) {
   try {
-    const adminToken = request.headers.get("X-Admin-Token");
-    const expectedToken = env.ADMIN_TOKEN;
+    const adminToken = context.request.headers.get("X-Admin-Token");
+    const expectedToken = context.env.ADMIN_TOKEN;
+    const sessionAuth = await requireAdminSession(context);
 
-    if (expectedToken && adminToken !== expectedToken) {
-      return jsonResponse({ error: "Unauthorized" }, 401);
+    const hasTokenAuth = expectedToken && adminToken === expectedToken;
+    if (!sessionAuth.ok && !hasTokenAuth) {
+      return jsonResponse({ error: "Unauthorized" }, 401, CORS_HEADERS);
     }
 
-    if (!env.ELYSIAN_DATA) {
-      return jsonResponse({ error: "KV namespace ELYSIAN_DATA not bound. Add it to your wrangler.jsonc." }, 500);
+    if (!context.env.DB && !context.env.ELYSIAN_DATA) {
+      return jsonResponse(
+        { error: "No build storage configured. Bind D1 DB or KV ELYSIAN_DATA." },
+        500,
+        CORS_HEADERS
+      );
     }
 
-    const body = await request.json();
+    const body = await context.request.json();
 
     if (!body.pcs || !Array.isArray(body.pcs)) {
-      return jsonResponse({ error: "Invalid payload: expected { pcs: [...] }" }, 400);
+      return jsonResponse({ error: "Invalid payload: expected { pcs: [...] }" }, 400, CORS_HEADERS);
     }
 
     if (!body.pcs.length) {
-      return jsonResponse({ error: "Catalog must contain at least one PC." }, 400);
+      return jsonResponse({ error: "Catalog must contain at least one PC." }, 400, CORS_HEADERS);
     }
 
-    const sanitized = body.pcs.map(pc => ({
-      id: String(pc.id || "").slice(0, 64),
-      name: String(pc.name || "").slice(0, 120),
-      price: Math.max(0, parseInt(pc.price) || 0),
-      category: ["workstation", "gaming", "creator", "entry"].includes(pc.category) ? pc.category : "gaming",
-      badge: String(pc.badge || "").slice(0, 40),
+    const sanitized = body.pcs.map((pc) => normalizeBuild({
+      ...pc,
       tags: normalizeTags(pc.tags),
-      specs: typeof pc.specs === "object" && pc.specs !== null ? pc.specs : {}
     }));
 
     const invalidEntry = sanitized.find(pc => !pc.id || !pc.name);
     if (invalidEntry) {
-      return jsonResponse({ error: "Each PC must have a non-empty id and name." }, 400);
+      return jsonResponse({ error: "Each PC must have a non-empty id and name." }, 400, CORS_HEADERS);
     }
 
     const ids = sanitized.map(pc => pc.id);
     if (new Set(ids).size !== ids.length) {
-      return jsonResponse({ error: "Each PC id must be unique." }, 400);
+      return jsonResponse({ error: "Each PC id must be unique." }, 400, CORS_HEADERS);
     }
 
-    const payload = {
-      pcs: sanitized,
-      updatedAt: new Date().toISOString()
-    };
+    if (context.env.DB) {
+      await saveBuildsToD1(context.env, sanitized);
+    }
+    if (context.env.ELYSIAN_DATA) {
+      await saveBuildsToKv(context.env, KV_KEY, sanitized);
+    }
 
-    await env.ELYSIAN_DATA.put(KV_KEY, JSON.stringify(payload));
-
-    return jsonResponse({ success: true, count: sanitized.length, updatedAt: payload.updatedAt });
+    const updatedAt = new Date().toISOString();
+    return jsonResponse({ success: true, count: sanitized.length, updatedAt }, 200, CORS_HEADERS);
   } catch (error) {
     console.error("POST /api/pcs error:", error);
-    return jsonResponse({ error: "Internal server error", detail: error.message }, 500);
+    return jsonResponse({ error: "Internal server error", detail: error.message }, 500, CORS_HEADERS);
   }
 }

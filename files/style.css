@@ -48,6 +48,22 @@
   --radius-md:      12px;
   --radius-lg:      20px;
   --radius-xl:      32px;
+
+  /* Effects */
+  --surface-blur: 20px;
+  --surface-blur-soft: 8px;
+  --aurora-blur: 10px;
+  --aurora-opacity: 0.45;
+  --aurora-speed: 60s;
+  --gold-wave-speed: 8s;
+  --hero-wave-speed: 8s;
+  --loader-glow-speed: 1.5s;
+  --loader-fill-speed: 1.5s;
+  --card-hover-lift: -4px;
+  --card-hover-shadow: var(--shadow-card), var(--shadow-gold);
+  --card-scale: 1.04;
+  --aurora-after-opacity: 1;
+  --aurora-after-blend: difference;
 }
 
 /* ── Light Mode Override ── */
@@ -117,6 +133,40 @@ html {
   font-size: 16px;
 }
 
+html[data-effects="medium"] {
+  --surface-blur: 12px;
+  --surface-blur-soft: 5px;
+  --aurora-blur: 7px;
+  --aurora-opacity: 0.3;
+  --aurora-speed: 110s;
+  --gold-wave-speed: 12s;
+  --hero-wave-speed: 12s;
+  --loader-glow-speed: 2.2s;
+  --loader-fill-speed: 2s;
+  --card-hover-lift: -2px;
+  --card-hover-shadow: var(--shadow-card);
+  --card-scale: 1.02;
+  --aurora-after-opacity: 0.55;
+  --aurora-after-blend: normal;
+}
+
+html[data-effects="low"] {
+  --surface-blur: 4px;
+  --surface-blur-soft: 0px;
+  --aurora-blur: 4px;
+  --aurora-opacity: 0.16;
+  --aurora-speed: 150s;
+  --gold-wave-speed: 18s;
+  --hero-wave-speed: 18s;
+  --loader-glow-speed: 2.8s;
+  --loader-fill-speed: 2.4s;
+  --card-hover-lift: -1px;
+  --card-hover-shadow: var(--shadow-card);
+  --card-scale: 1.01;
+  --aurora-after-opacity: 0;
+  --aurora-after-blend: normal;
+}
+
 body {
   font-family: var(--font-body);
   background-color: var(--bg-primary);
@@ -141,9 +191,8 @@ body {
 #aurora-layer {
   position: absolute;
   inset: -10px;
-  opacity: 0.45;
-  will-change: transform;
-  filter: blur(10px);
+  opacity: var(--aurora-opacity);
+  filter: blur(var(--aurora-blur));
 
   /* Dark mode aurora (default) */
   background-image:
@@ -160,10 +209,10 @@ body {
       #93c5fd 20%,   /* blue-300  */
       #c4b5fd 25%,   /* violet-200 */
       #60a5fa 30%    /* blue-400  */
-    );
+  );
   background-size: 300%, 200%;
   background-position: 50% 50%, 50% 50%;
-  animation: aurora 60s linear infinite;
+  animation: aurora var(--aurora-speed) linear infinite;
 
   /* Mask: strong top-right fade like the component */
   -webkit-mask-image: radial-gradient(ellipse at 100% 0%, black 10%, transparent 70%);
@@ -189,17 +238,18 @@ body {
       #93c5fd 20%,
       #c4b5fd 25%,
       #60a5fa 30%
-    );
+  );
   background-size: 200%, 100%;
-  background-attachment: fixed;
-  animation: aurora 60s linear infinite;
-  mix-blend-mode: difference;
+  background-attachment: scroll;
+  animation: aurora var(--aurora-speed) linear infinite;
+  mix-blend-mode: var(--aurora-after-blend);
+  opacity: var(--aurora-after-opacity);
 }
 
 /* ── Light mode aurora ── */
 [data-theme="light"] #aurora-layer {
   opacity: 0.25;
-  filter: blur(10px) invert(1);
+  filter: blur(var(--aurora-blur)) invert(1);
   background-image:
     repeating-linear-gradient(
       100deg,
@@ -256,8 +306,8 @@ body {
   border-bottom: 1px solid var(--border-subtle);
   background:
     linear-gradient(90deg, rgba(212, 168, 67, 0.16), rgba(12, 12, 16, 0.88) 20%, rgba(12, 12, 16, 0.88) 80%, rgba(212, 168, 67, 0.16));
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(var(--surface-blur));
+  -webkit-backdrop-filter: blur(var(--surface-blur));
 }
 
 .site-ribbon-inner {
@@ -368,8 +418,8 @@ a:hover { color: var(--gold-light); }
   align-items: center;
   justify-content: space-between;
   background: rgba(10, 10, 12, 0.52);
-  backdrop-filter: blur(20px) saturate(1.4);
-  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  backdrop-filter: blur(var(--surface-blur)) saturate(1.2);
+  -webkit-backdrop-filter: blur(var(--surface-blur)) saturate(1.2);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 999px;
   max-width: min(1280px, calc(100% - 2rem));
@@ -531,7 +581,7 @@ a:hover { color: var(--gold-light); }
   position: fixed;
   top: 72px; left: 0; right: 0;
   background: var(--bg-glass);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(var(--surface-blur));
   border-bottom: 1px solid var(--border-gold);
   z-index: 999;
   padding: 1.5rem 2rem;
@@ -699,8 +749,8 @@ a:hover { color: var(--gold-light); }
 .card:hover {
   background: var(--bg-card-hover);
   border-color: var(--border-gold);
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-card), var(--shadow-gold);
+  transform: translateY(var(--card-hover-lift));
+  box-shadow: var(--card-hover-shadow);
 }
 
 .card-body { padding: 1.75rem; }
@@ -718,7 +768,7 @@ a:hover { color: var(--gold-light); }
   display: block;
   transition: transform 0.6s var(--ease-gold);
 }
-.pc-card:hover .pc-card-image { transform: scale(1.04); }
+.pc-card:hover .pc-card-image { transform: scale(var(--card-scale)); }
 
 .pc-card-badge {
   position: absolute;
@@ -969,6 +1019,14 @@ select.form-control {
   animation: scrollBounce 2s infinite;
 }
 .scroll-indicator svg { color: var(--gold-dim); }
+
+html[data-effects="medium"] .scroll-indicator {
+  animation-duration: 3.25s;
+}
+
+html[data-effects="low"] .scroll-indicator {
+  animation: none;
+}
 @keyframes scrollBounce {
   0%, 100% { transform: translateX(-50%) translateY(0); }
   50% { transform: translateX(-50%) translateY(8px); }
@@ -1024,7 +1082,7 @@ select.form-control {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(var(--surface-blur-soft));
 }
 .cart-overlay.open { opacity: 1; pointer-events: all; }
 
@@ -1412,7 +1470,7 @@ select.form-control {
   border-radius: 12px;
   border: 1px solid var(--border-gold);
   object-fit: contain;
-  animation: logoGlow 1.5s ease-in-out infinite alternate;
+  animation: logoGlow var(--loader-glow-speed) ease-in-out infinite alternate;
 }
 @keyframes logoGlow {
   from { box-shadow: 0 0 20px var(--gold-glow); }
@@ -1429,7 +1487,7 @@ select.form-control {
   height: 100%;
   background: linear-gradient(90deg, var(--gold-dim), var(--gold-pure));
   border-radius: 2px;
-  animation: loaderFill 1.5s ease-in-out infinite;
+  animation: loaderFill var(--loader-fill-speed) ease-in-out infinite;
 }
 @keyframes loaderFill {
   0% { width: 0%; margin-left: 0; }
@@ -1447,7 +1505,7 @@ select.form-control {
 .btn-primary:not(#btn-checkout) {
   background-image: var(--gold-wave-gradient);
   background-size: 220% 220%;
-  animation: goldWaveShift 8s ease-in-out infinite;
+  animation: goldWaveShift var(--gold-wave-speed) ease-in-out infinite;
   color: #120d05;
 }
 
@@ -1468,7 +1526,7 @@ select.form-control {
 .footer-heading {
   background-image: var(--gold-wave-gradient);
   background-size: 220% 220%;
-  animation: goldWaveShift 8s ease-in-out infinite;
+  animation: goldWaveShift var(--gold-wave-speed) ease-in-out infinite;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1504,7 +1562,20 @@ select.form-control {
 .pc-card-badge {
   background-image: var(--gold-wave-gradient);
   background-size: 220% 220%;
-  animation: goldWaveShift 8s ease-in-out infinite;
+  animation: goldWaveShift var(--gold-wave-speed) ease-in-out infinite;
+}
+
+html[data-effects="low"] .pc-card-price,
+html[data-effects="low"] .section-eyebrow,
+html[data-effects="low"] .hero-eyebrow,
+html[data-effects="low"] .feature-title,
+html[data-effects="low"] .testimonial-author,
+html[data-effects="low"] .contact-label,
+html[data-effects="low"] .stat-number,
+html[data-effects="low"] .footer-heading,
+html[data-effects="low"] .pc-card-badge {
+  animation: none;
+  background-position: 50% 50%;
 }
 
 #btn-checkout,
@@ -1625,6 +1696,110 @@ select.form-control {
 .reveal.visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+html.effects-paused #aurora-layer,
+html.effects-paused #aurora-layer::after,
+html.effects-paused .scroll-indicator,
+html.effects-paused .loader-logo,
+html.effects-paused .loader-bar-fill,
+html.effects-paused .btn-primary:not(#btn-checkout),
+html.effects-paused .btn-outline,
+html.effects-paused .btn-ghost,
+html.effects-paused .nav-logo span,
+html.effects-paused .pc-card-price,
+html.effects-paused .section-eyebrow,
+html.effects-paused .hero-eyebrow,
+html.effects-paused .feature-title,
+html.effects-paused .testimonial-author,
+html.effects-paused .contact-label,
+html.effects-paused .stat-number,
+html.effects-paused .footer-heading,
+html.effects-paused .pc-card-badge {
+  animation-play-state: paused !important;
+}
+
+html[data-effects="medium"] .animate__animated {
+  --animate-duration: 0.7s;
+}
+
+html[data-effects="low"] .animate__animated {
+  --animate-duration: 0.5s;
+}
+
+html[data-effects="low"] .animate__delay-1s,
+html[data-effects="low"] .animate__delay-2s {
+  animation-delay: 0s !important;
+}
+
+@supports (content-visibility: auto) {
+  .section,
+  .stats-bar,
+  .footer,
+  .pc-card,
+  .testimonial,
+  .process-step {
+    content-visibility: auto;
+  }
+
+  .section,
+  .footer {
+    contain-intrinsic-size: 1px 880px;
+  }
+
+  .stats-bar {
+    contain-intrinsic-size: 1px 180px;
+  }
+
+  .pc-card,
+  .testimonial,
+  .process-step {
+    contain-intrinsic-size: 1px 420px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  #aurora-layer,
+  #aurora-layer::after,
+  .scroll-indicator,
+  .loader-logo,
+  .loader-bar-fill,
+  .btn-primary:not(#btn-checkout),
+  .btn-outline,
+  .btn-ghost,
+  .nav-logo span,
+  .pc-card-price,
+  .section-eyebrow,
+  .hero-eyebrow,
+  .feature-title,
+  .testimonial-author,
+  .contact-label,
+  .stat-number,
+  .footer-heading,
+  .pc-card-badge,
+  .animate__animated {
+    animation: none !important;
+  }
+
+  .reveal,
+  .card,
+  .pc-card-image,
+  .gallery-slide img,
+  .btn,
+  .modal,
+  .navbar,
+  .cart-sidebar {
+    transition-duration: 0.01ms !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* ============================================================

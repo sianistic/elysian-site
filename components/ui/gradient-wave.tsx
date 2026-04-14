@@ -10,6 +10,38 @@ function normalizeColor(hexCode: number): number[] {
   ];
 }
 
+type EffectQuality = "high" | "medium" | "low";
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+function detectEffectQuality(): EffectQuality {
+  if (typeof window === "undefined") return "high";
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    return "low";
+  }
+
+  let score = 3;
+  const cores = navigator.hardwareConcurrency || 0;
+  const memory = navigator.deviceMemory || 0;
+  const viewportPixels = window.innerWidth * window.innerHeight;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  if (memory && memory <= 4) score -= 1;
+  if (memory && memory <= 2) score -= 1;
+  if (cores && cores <= 4) score -= 1;
+  if (cores && cores <= 2) score -= 1;
+  if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    score -= 1;
+  }
+  if (viewportPixels > 2300000 && dpr > 1.25) score -= 1;
+
+  if (score <= 0) return "low";
+  if (score <= 2) return "medium";
+  return "high";
+}
+
 class MiniGl {
   canvas: HTMLCanvasElement;
   gl: WebGLRenderingContext;
@@ -23,9 +55,16 @@ class MiniGl {
   Mesh: any;
   Attribute: any;
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(
+    canvas: HTMLCanvasElement,
+    options: { antialias?: boolean } = {}
+  ) {
     this.canvas = canvas;
-    const gl = this.canvas.getContext("webgl", { antialias: true });
+    const gl = this.canvas.getContext("webgl", {
+      antialias: options.antialias ?? true,
+      alpha: true,
+      powerPreference: "low-power",
+    });
     if (!gl) throw new Error("WebGL not supported");
     this.gl = gl;
 
@@ -434,11 +473,31 @@ class Gradient {
   last = 0;
   animationId?: number;
   isPlaying = false;
+  wantsToPlay = false;
+  isInViewport = true;
+  readonly frameInterval: number;
+  readonly quality: EffectQuality;
+  readonly host?: HTMLElement;
+  readonly resizeHandler: () => void;
+  readonly visibilityHandler: () => void;
+  viewportObserver?: IntersectionObserver;
 
-  constructor(canvas: HTMLCanvasElement, colors: string[]) {
+  constructor(
+    canvas: HTMLCanvasElement,
+    colors: string[],
+    options: { quality?: EffectQuality; host?: HTMLElement } = {}
+  ) {
     this.canvas = canvas;
     this.colors = colors;
-    this.minigl = new MiniGl(canvas);
+    this.quality = options.quality || detectEffectQuality();
+    this.host = options.host;
+    this.frameInterval = this.quality === "high" ? 1000 / 30 : 1000 / 24;
+    this.minigl = new MiniGl(canvas, { antialias: this.quality === "high" });
+    this.resizeHandler = () => this.resize();
+    this.visibilityHandler = () => {
+      this.last = 0;
+      this.syncPlayback();
+    };
     this.init();
   }
 
@@ -628,26 +687,63 @@ void main() {
     this.mesh = new this.minigl.Mesh(geometry, material);
 
     this.resize();
-    window.addEventListener("resize", () => this.resize());
+    window.addEventListener("resize", this.resizeHandler, { passive: true });
+    document.addEventListener("visibilitychange", this.visibilityHandler);
+
+    if (this.host && "IntersectionObserver" in window) {
+      this.viewportObserver = new IntersectionObserver(
+        ([entry]) => {
+          this.isInViewport = Boolean(entry?.isIntersecting);
+          this.last = 0;
+          if (this.isInViewport) {
+            this.resize();
+          }
+          this.syncPlayback();
+        },
+        { threshold: 0.01 }
+      );
+      this.viewportObserver.observe(this.host);
+    }
   }
 
   resize(): void {
     const width = window.innerWidth;
     const height = window.innerHeight;
-    this.minigl.setSize(width, height);
+    const renderScale =
+      this.quality === "low" ? 0.72 : this.quality === "medium" ? 0.84 : 1;
+    const renderWidth = Math.max(320, Math.round(width * renderScale));
+    const renderHeight = Math.max(220, Math.round(height * renderScale));
+
+    this.minigl.setSize(renderWidth, renderHeight);
     this.minigl.setOrthographicCamera();
 
-    const xSegCount = Math.ceil(width * 0.02);
-    const ySegCount = Math.ceil(height * 0.05);
+    const densityX =
+      this.quality === "low" ? 0.0075 : this.quality === "medium" ? 0.01 : 0.014;
+    const densityY =
+      this.quality === "low" ? 0.016 : this.quality === "medium" ? 0.022 : 0.03;
+    const xSegCount = clamp(Math.ceil(renderWidth * densityX), 18, 36);
+    const ySegCount = clamp(Math.ceil(renderHeight * densityY), 16, 40);
+
     this.mesh.geometry.setTopology(xSegCount, ySegCount);
-    this.mesh.geometry.setSize(width, height);
-    this.mesh.material.uniforms.u_shadow_power.value = width < 600 ? 5 : 6;
+    this.mesh.geometry.setSize(renderWidth, renderHeight);
+    this.mesh.material.uniforms.u_shadow_power.value =
+      width < 600 || this.quality !== "high" ? 5 : 6;
   }
 
   animate = (timestamp: number): void => {
     if (!this.isPlaying) return;
 
-    this.time += Math.min(timestamp - this.last, 1000 / 15);
+    if (!this.last) {
+      this.last = timestamp;
+    }
+
+    const delta = timestamp - this.last;
+    if (delta < this.frameInterval) {
+      this.animationId = requestAnimationFrame(this.animate);
+      return;
+    }
+
+    this.time += Math.min(delta, this.frameInterval * 2);
     this.last = timestamp;
     this.mesh.material.uniforms.u_time.value = this.time;
     this.minigl.render();
@@ -655,16 +751,44 @@ void main() {
     this.animationId = requestAnimationFrame(this.animate);
   };
 
+  syncPlayback(): void {
+    const shouldPlay =
+      this.wantsToPlay &&
+      document.visibilityState !== "hidden" &&
+      this.isInViewport;
+
+    if (shouldPlay && !this.isPlaying) {
+      this.isPlaying = true;
+      this.last = 0;
+      this.animationId = requestAnimationFrame(this.animate);
+      return;
+    }
+
+    if (!shouldPlay && this.isPlaying) {
+      this.isPlaying = false;
+      if (this.animationId) {
+        cancelAnimationFrame(this.animationId);
+      }
+      this.animationId = undefined;
+      this.last = 0;
+    }
+  }
+
   start(): void {
-    this.isPlaying = true;
-    this.animationId = requestAnimationFrame(this.animate);
+    this.wantsToPlay = true;
+    this.syncPlayback();
   }
 
   stop(): void {
-    this.isPlaying = false;
-    if (this.animationId) {
-      cancelAnimationFrame(this.animationId);
-    }
+    this.wantsToPlay = false;
+    this.syncPlayback();
+  }
+
+  destroy(): void {
+    this.stop();
+    window.removeEventListener("resize", this.resizeHandler);
+    document.removeEventListener("visibilitychange", this.visibilityHandler);
+    this.viewportObserver?.disconnect();
   }
 }
 
@@ -716,7 +840,10 @@ export function GradientWave({
     containerRef.current.appendChild(canvas);
 
     try {
-      const gradient = new Gradient(canvas, colors);
+      const gradient = new Gradient(canvas, colors, {
+        quality: detectEffectQuality(),
+        host: containerRef.current,
+      });
       gradientRef.current = gradient;
 
       gradient.mesh.material.uniforms.u_shadow_power.value = shadowPower;
@@ -737,7 +864,7 @@ export function GradientWave({
     }
 
     return () => {
-      gradientRef.current?.stop();
+      gradientRef.current?.destroy();
       if (containerRef.current?.contains(canvas)) {
         containerRef.current.removeChild(canvas);
       }

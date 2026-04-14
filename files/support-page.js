@@ -2,13 +2,6 @@
    ELYSIAN PCS — Support Page Logic
    ============================================================ */
 
-// EmailJS Init
-(function () {
-  if (typeof emailjs !== 'undefined') {
-    emailjs.init({ publicKey: '9CNRBFJzrjkM4BrNT' });
-  }
-})();
-
 // Progress tracker
 var supportFields = ['ticket-name', 'ticket-email', 'ticket-subject', 'ticket-message'];
 
@@ -57,20 +50,19 @@ function resetTicketForm() {
   if (catEl) catEl.selectedIndex = 0;
   var lowPri = document.querySelector('input[name="priority"][value="Low"]');
   if (lowPri) lowPri.checked = true;
+  var successId = document.getElementById('ticket-success-id');
+  if (successId) successId.textContent = 'TKT-...';
+  var successMeta = document.getElementById('ticket-success-meta');
+  if (successMeta) successMeta.textContent = 'We will use your submitted email address for follow-up updates.';
   updateProgress();
   showTicketForm();
 }
 
-// Submit ticket via EmailJS
-function submitTicket() {
-  if (typeof emailjs === 'undefined' || typeof emailjs.send !== 'function') {
-    Toast.error('Support email service is unavailable right now. Please try again later.');
-    return;
-  }
-
+// Submit ticket to the internal support API
+async function submitTicket() {
   var name     = document.getElementById('ticket-name').value.trim();
   var email    = document.getElementById('ticket-email').value.trim();
-  var orderId  = document.getElementById('ticket-order').value.trim();
+  var reference = document.getElementById('ticket-order').value.trim();
   var category = document.getElementById('ticket-category').value;
   var priEl    = document.querySelector('input[name="priority"]:checked');
   var priority = priEl ? priEl.value : 'Low';
@@ -91,48 +83,60 @@ function submitTicket() {
   var btn = document.getElementById('ticket-submit');
   if (btn) {
     btn.disabled = true;
-    btn.textContent = 'Sending…';
+    btn.textContent = 'Sending...';
   }
 
-  var ticketId  = 'ELYS-' + Date.now().toString(36).toUpperCase();
-  var timestamp = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
-
-  var params = {
-    to_email:  'd4yohero@gmail.com',
-    from_name: name,
-    from_email: email,
-    ticket_id: ticketId,
-    order_id:  orderId || 'N/A',
-    category:  category,
-    priority:  priority,
-    subject:   subject,
-    message:   message,
-    timestamp: timestamp,
-    reply_to:  email
-  };
-
-  emailjs.send('service_tl3ndnq', 'template_us6x8o2', params)
-    .then(function () {
-      var wrapper = document.getElementById('ticket-form-wrapper');
-      if (wrapper) wrapper.style.display = 'none';
-      var success = document.getElementById('ticket-success');
-      if (success) success.classList.add('visible');
-      Toast.success('Ticket submitted successfully!');
-    })
-    .catch(function (err) {
-      var wrapper = document.getElementById('ticket-form-wrapper');
-      if (wrapper) wrapper.style.display = 'none';
-      var errMsg = document.getElementById('ticket-error-msg');
-      if (errMsg) errMsg.textContent = (err && err.text) ? err.text : 'An unexpected error occurred. Please try again.';
-      var errEl = document.getElementById('ticket-error');
-      if (errEl) errEl.classList.add('visible');
-      Toast.error('Failed to submit ticket.');
-      console.error('EmailJS error:', err);
-    })
-    .finally(function () {
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = 'Submit Ticket';
-      }
+  try {
+    var response = await fetch('/api/support/tickets', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name,
+        email: email,
+        reference: reference,
+        category: category,
+        priority: priority,
+        subject: subject,
+        message: message
+      })
     });
+    var data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || 'Unable to create your support ticket.');
+    }
+
+    var wrapper = document.getElementById('ticket-form-wrapper');
+    if (wrapper) wrapper.style.display = 'none';
+    var success = document.getElementById('ticket-success');
+    if (success) success.classList.add('visible');
+    var successId = document.getElementById('ticket-success-id');
+    if (successId) successId.textContent = data.ticketId || 'TKT-UNKNOWN';
+    var successMeta = document.getElementById('ticket-success-meta');
+    if (successMeta) {
+      if (reference && data.referenceType === 'order') {
+        successMeta.textContent = 'We matched your reference to an existing order and attached it to the ticket.';
+      } else if (reference && data.referenceType === 'quote') {
+        successMeta.textContent = 'We matched your reference to an existing quote and attached it to the ticket.';
+      } else if (reference) {
+        successMeta.textContent = 'We saved the reference exactly as entered so support can review it manually.';
+      } else {
+        successMeta.textContent = 'We will use your submitted email address for follow-up updates.';
+      }
+    }
+    Toast.success('Ticket submitted successfully!');
+  } catch (err) {
+    var wrapper = document.getElementById('ticket-form-wrapper');
+    if (wrapper) wrapper.style.display = 'none';
+    var errMsg = document.getElementById('ticket-error-msg');
+    if (errMsg) errMsg.textContent = (err && err.message) ? err.message : 'An unexpected error occurred. Please try again.';
+    var errEl = document.getElementById('ticket-error');
+    if (errEl) errEl.classList.add('visible');
+    Toast.error('Failed to submit ticket.');
+    console.error('Support ticket error:', err);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Submit Ticket';
+    }
+  }
 }
